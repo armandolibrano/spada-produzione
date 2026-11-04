@@ -390,7 +390,7 @@ function go(){
 }
 window.addEventListener('hashchange',go);
 
-function head(n,title,desc,actions=''){return `<div class="eyebrow">Produzione / ${n}</div><div class="heading"><div><h1>${title}</h1>${desc?`<p>${desc}</p>`:''}</div><div class="actions">${actions}</div></div>`}
+function head(n,title,desc,actions=''){return `<div class="eyebrow">Produzione / ${n}</div><div class="heading"><div><h1>${title}</h1></div><div class="actions">${actions}</div></div>`}
 
 /* ---------- Ordini stagione ---------- */
 const F={q:'',gruppo:'',fornitore:'',camp:'',tg:'',avvisi:false,sort:'gruppo',dir:1};
