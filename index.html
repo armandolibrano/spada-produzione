@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SPADA · Produzione</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap">
+<style>
+:root{--rail:#101110;--canvas:#F0EEE8;--top:#FFFEFA;--heading:#F4F1E9;--controls:#EAE7DF;--columns:#E4E1D9;--data:#FFFEFA;--alt:#F6F3EC;--hover:#EDE8DC;--edge:#D9D5CC;--ink:#070706;--secondary:#34322D;--quiet:#6B675E;--surface:#FBFAF6;--lime:#DFFF3F;--mono:'Space Mono',ui-monospace,monospace;color-scheme:light}
+:root[data-theme=dark]{--canvas:#191A18;--top:#20221D;--heading:#232520;--controls:#2B2D27;--columns:#33362E;--data:#21231E;--alt:#252721;--hover:#303629;--edge:#44483D;--ink:#F4F1E9;--secondary:#D1CEC6;--quiet:#99968F;--surface:#111110;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--rail);color:var(--ink);font:15px/1.5 Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+.num,time,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* Rail */
+.sidebar{position:fixed;inset:0 auto 0 0;width:248px;padding:24px 14px 18px;background:var(--rail);color:#F4F1E9;display:flex;flex-direction:column;overflow:auto;z-index:30}
+.logo{padding:0 12px 22px;text-decoration:none;display:block}
+.wordmark{font-weight:800;letter-spacing:-.04em;font-size:25px;display:block}
+.logo-sub{font-size:9px;letter-spacing:.09em;color:#AAA99F}
+.ws{margin:0 10px 18px;padding:12px 0;font-size:12px;border-top:1px solid #343630;border-bottom:1px solid #343630}
+.ws small{display:block;color:#AAA99F;font-size:10px;letter-spacing:.06em}
+.nav-label{margin:0 12px 9px;font-size:9px;letter-spacing:.06em;color:#AAA99F}
+.nav{display:grid;gap:3px}
+.nav a,.nav .off{display:flex;align-items:center;gap:10px;min-height:40px;padding:9px 11px;border:1px solid transparent;border-radius:7px;color:#D8D8D1;font-size:13px;font-weight:500;text-decoration:none}
+.nav a:hover{background:#252822;color:#fff}
+.nav a[aria-current=page]{background:#2B2E27;color:#fff;border-color:#41453A;font-weight:650}
+.nav a:focus-visible{outline:2px solid var(--lime);outline-offset:1px}
+.nav .off{color:#6f7268;cursor:default}
+.nav .off small{margin-left:auto;font-size:9px;letter-spacing:.05em}
+.nav svg{width:18px;height:18px;flex:0 0 18px}
+.nav .area{color:#fff;font-weight:650;background:#1b1d19;border-color:#343630}
+.nav .pages{margin:4px 0 6px 20px;padding-left:10px;border-left:1px solid #41453A;display:grid;gap:3px}
+.nav .pages a{min-height:36px;padding:8px 10px;font-size:12px}
+.nav .pages a .cnt{margin-left:auto;font-family:var(--mono);font-size:10px;color:#AAA99F}
+.side-bottom{margin-top:auto;padding:26px 10px 0;font-size:11px;color:#AAA99F}
+.side-bottom .badge{display:inline-block;border:1px solid #41453A;border-radius:6px;padding:3px 8px;color:#F4F1E9;font-size:10px;letter-spacing:.05em}
+.mobile-close{display:none}
+
+/* Shell */
+.shell{margin:8px 8px 8px 248px;min-height:calc(100dvh - 16px);background:var(--canvas);border:1px solid var(--edge);border-radius:14px;display:flex;flex-direction:column}
+.shell>header{display:flex;align-items:center;gap:18px;min-height:72px;padding:14px clamp(20px,2.6vw,36px);background:var(--top);border-bottom:1px solid var(--edge);border-radius:13px 13px 0 0}
+.crumb{color:var(--quiet);font-size:13px}
+.crumb strong{color:var(--ink)}
+.crumb span{margin:0 6px}
+.season{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--quiet);font-size:13px}
+.season select{background:var(--surface);border:1px solid var(--edge);border-radius:8px;padding:8px 12px;min-width:120px}
+.theme{display:flex;gap:3px;background:var(--controls);padding:3px;border-radius:8px;border:1px solid var(--edge)}
+.theme button{border:0;background:none;padding:6px 9px;border-radius:5px;font-size:11px;letter-spacing:.025em;text-transform:uppercase;color:var(--quiet);cursor:pointer}
+.theme button[aria-pressed=true]{background:var(--data);color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgb(0 0 0/.12)}
+.menu-btn{display:none;border:1px solid var(--edge);background:none;border-radius:8px;min-width:40px;min-height:40px;cursor:pointer}
+main{flex:1;padding:24px clamp(20px,2.6vw,36px) 30px;min-width:0}
+.shell>footer{display:flex;justify-content:space-between;gap:16px;padding:14px clamp(20px,2.6vw,36px);background:var(--top);border-top:1px solid var(--edge);border-radius:0 0 13px 13px;color:var(--quiet);font-size:11px;letter-spacing:.04em}
+.shell>footer a{color:var(--secondary);text-underline-offset:3px}
+
+/* Heading zone */
+.eyebrow{background:var(--heading);border:1px solid var(--edge);border-bottom:0;border-radius:10px 10px 0 0;padding:20px 24px 10px;font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--secondary);text-transform:uppercase}
+.heading{background:var(--heading);border:1px solid var(--edge);border-top:0;border-radius:0 0 10px 10px;padding:0 24px 22px;margin-bottom:20px;display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.heading h1{margin:0;font-weight:800;font-size:clamp(30px,3.6vw,48px);line-height:1;letter-spacing:-.04em}
+.heading p{margin:10px 0 0;color:var(--secondary);max-width:70ch}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:9px 14px;border:1px solid var(--edge);border-radius:8px;background:var(--data);color:var(--ink);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--quiet)}
+.btn.primary{background:var(--lime);border-color:var(--lime);color:#070706}
+.btn.primary:hover{filter:brightness(.95)}
+.btn.ghost{background:none;border-color:transparent;text-decoration:underline;text-underline-offset:4px;font-weight:500;padding-inline:4px}
+.btn.danger{color:var(--ink);border-color:var(--ink)}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.link{border:0;background:none;padding:0;color:var(--ink);text-decoration:underline;text-underline-offset:4px;cursor:pointer;text-align:left}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--data);border:1px solid var(--edge);border-radius:10px;padding:16px 18px;min-width:0;display:flex;flex-direction:column;gap:6px;text-align:left;cursor:default}
+button.kpi{cursor:pointer;font:inherit;color:inherit}
+button.kpi:hover{border-color:var(--ink)}
+.kpi span{font-size:12px;font-weight:600}
+.kpi strong{font-family:var(--mono);font-size:clamp(22px,2.2vw,30px);line-height:1.1;letter-spacing:-.03em;overflow-wrap:anywhere;font-weight:400}
+.kpi small{font-size:11px;color:var(--quiet)}
+
+/* Panel + table */
+.panel{background:var(--data);border:1px solid var(--edge);border-radius:10px;box-shadow:0 1px 3px rgb(0 0 0/.04);min-width:0;margin-bottom:20px}
+.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;padding:14px 18px;background:var(--controls);border-bottom:1px solid var(--edge);border-radius:9px 9px 0 0}
+.toolbar label{display:grid;gap:5px;font-size:11px;letter-spacing:.04em;color:var(--secondary);text-transform:uppercase}
+.toolbar .search{flex:1 1 240px}
+input:not([type=checkbox]),select,textarea{background:var(--surface);border:1px solid var(--edge);border-radius:8px;padding:9px 11px;min-height:40px;color:var(--ink);text-transform:none;letter-spacing:0;font-size:14px;width:100%}
+textarea{min-height:76px;resize:vertical}
+input[type=checkbox]{accent-color:var(--ink);width:18px;height:18px}
+.check{display:flex!important;align-items:center;gap:8px;text-transform:none!important;letter-spacing:0!important;font-size:13px!important;min-height:40px}
+.table-scroll{overflow:auto;max-height:70vh}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{position:sticky;top:0;z-index:1;background:var(--columns);color:var(--secondary);font-size:11px;letter-spacing:.05em;text-transform:uppercase;font-weight:600;text-align:left;padding:10px 14px;border-bottom:1px solid var(--edge);white-space:nowrap}
+th.r,td.r{text-align:right}
+th button{all:unset;cursor:pointer}
+th button:hover{text-decoration:underline}
+td{padding:11px 14px;border-bottom:1px solid var(--edge);color:var(--secondary);vertical-align:top}
+tbody tr:nth-child(even){background:var(--alt)}
+tbody tr.click{cursor:pointer}
+tbody tr.click:hover{background:var(--hover)}
+th:first-child,td:first-child{padding-left:18px}
+th:last-child,td:last-child{padding-right:18px}
+td .main{color:var(--ink);font-weight:600}
+td .sub{display:block;font-size:12px;color:var(--quiet)}
+td.r .sub{white-space:nowrap;font-size:11px}
+tfoot td{background:var(--heading);font-weight:700;color:var(--ink)}
+.table-bottom{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 18px;background:var(--heading);border-top:1px solid var(--edge);border-radius:0 0 9px 9px;font-size:12px;color:var(--quiet)}
+.empty{padding:40px 18px;text-align:center;color:var(--quiet)}
+.forn{display:block;max-width:170px;font-size:13px;color:var(--secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font-size:11px;border:1px solid var(--edge);border-radius:5px;padding:1px 6px;color:var(--secondary);white-space:nowrap;background:var(--surface)}
+
+/* Status */
+.st{display:inline-flex;align-items:center;gap:6px;font-size:12px;white-space:nowrap;color:var(--secondary)}
+.st::before{content:'';width:8px;height:8px;border-radius:50%;border:1.5px solid currentColor}
+.st[data-s=approvato]{color:var(--ink);font-weight:700}
+.st[data-s=approvato]::before{background:currentColor}
+.st[data-s=ricevuto]::before{background:linear-gradient(90deg,currentColor 50%,transparent 50%)}
+.st[data-s=da_rivedere]{color:var(--ink);font-weight:700}
+.st[data-s=da_rivedere]::before{border-radius:1px;background:var(--lime);border-color:var(--ink)}
+.st[data-s=in_attesa]{color:var(--quiet)}
+.flag{font-family:var(--mono);font-size:11px;white-space:nowrap}
+.flag b{font-weight:700;color:var(--ink)}
+.lvl{font-family:var(--mono);font-size:10px;letter-spacing:.06em;padding:2px 6px;border-radius:4px;border:1px solid var(--edge);white-space:nowrap}
+.lvl[data-l=errore]{background:var(--ink);color:var(--canvas);border-color:var(--ink)}
+.lvl[data-l=verifica]{background:var(--lime);color:#070706;border-color:#b9d400}
+
+/* Tabs */
+.tabs{display:flex;gap:24px;padding:0 18px;background:var(--controls);border-bottom:1px solid var(--edge);overflow-x:auto}
+.tabs button{border:0;background:none;padding:14px 0;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--quiet);cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected=true]{color:var(--ink);font-weight:700;box-shadow:inset 0 -3px 0 var(--ink)}
+
+/* Drawer */
+dialog{border:1px solid var(--edge);border-radius:12px;background:var(--canvas);color:var(--ink);padding:0}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+#drawer{max-width:none;width:min(980px,96vw);height:min(92dvh,980px);max-height:92dvh;margin:auto 8px auto auto;display:none;flex-direction:column}
+#drawer[open]{display:flex}
+.d-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:20px 24px 16px;background:var(--heading);border-bottom:1px solid var(--edge);border-radius:12px 12px 0 0}
+.d-top h2{margin:2px 0 0;font-size:26px;line-height:1.1;letter-spacing:-.03em;font-weight:800}
+.d-top .eyebrow-s{font-family:var(--mono);font-size:11px;color:var(--quiet)}
+.d-close{border:1px solid var(--edge);background:var(--data);border-radius:8px;width:40px;height:40px;font-size:20px;cursor:pointer;flex:0 0 40px}
+.d-body{flex:1;overflow:auto;padding:20px 24px}
+.d-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px;background:var(--controls);border-top:1px solid var(--edge);border-radius:0 0 12px 12px;flex-wrap:wrap}
+.d-foot .msg{font-size:13px;color:var(--secondary)}
+.sec{background:var(--data);border:1px solid var(--edge);border-radius:10px;padding:18px;margin-bottom:16px}
+.sec h3{margin:0 0 14px;font-size:13px;letter-spacing:.05em;text-transform:uppercase;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.grid label{display:grid;gap:5px;font-size:12px;color:var(--secondary);min-width:0}
+.grid .w2{grid-column:span 2}.grid .w4{grid-column:1/-1}
+.grid .ro{min-height:40px;display:flex;align-items:center;padding:9px 11px;border:1px dashed var(--edge);border-radius:8px;font-family:var(--mono);font-size:13px;color:var(--ink)}
+.req::after{content:' *'}
+.notice{background:var(--alt);border:1px solid var(--edge);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--secondary);margin:0 0 14px}
+.notice strong{color:var(--ink)}
+.notice.err{border-color:var(--ink);background:var(--surface)}
+.comp-preview{margin-top:8px;font-size:12px;display:flex;flex-wrap:wrap;gap:6px 14px}
+.comp-preview span b{font-weight:700}
+.mini td,.mini th{padding:8px 10px}
+.mini input{min-height:34px;padding:6px 8px}
+.mini input.tg{width:46px;text-align:right;padding:6px 5px}
+.tg-table td .sub{display:block;font-size:10px;color:var(--ink);font-weight:700;margin-top:2px;white-space:nowrap}
+.mini input[readonly]{background:transparent;border-style:dashed;font-family:var(--mono)}
+.tg-table th.r,.tg-table td.r{padding-left:4px;padding-right:4px}
+.mini th:first-child,.mini td:first-child{padding-left:10px}
+.timeline{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.timeline li{display:grid;grid-template-columns:110px 1fr auto;gap:12px;align-items:start;padding:12px 14px;border:1px solid var(--edge);border-radius:8px;background:var(--surface)}
+.timeline .when{font-family:var(--mono);font-size:12px;color:var(--quiet)}
+.timeline p{margin:4px 0 0;font-size:13px;color:var(--secondary)}
+.hist{font-size:13px}
+.hist li{padding:10px 0;border-bottom:1px solid var(--edge)}
+.hist ul{margin:6px 0 0;padding-left:18px;color:var(--secondary)}
+
+/* Board */
+.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.col{background:var(--data);border:1px solid var(--edge);border-radius:10px;min-width:0;display:flex;flex-direction:column;max-height:72vh}
+.col h3{margin:0;padding:12px 14px;background:var(--controls);border-bottom:1px solid var(--edge);border-radius:9px 9px 0 0;font-size:12px;letter-spacing:.05em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+.col h3 .num{font-weight:400}
+.col .list{overflow:auto;padding:10px;display:grid;gap:8px;align-content:start}
+.card{text-align:left;border:1px solid var(--edge);border-radius:8px;background:var(--surface);padding:10px 12px;cursor:pointer;display:grid;gap:3px;font:inherit;color:inherit}
+.card:hover{border-color:var(--ink)}
+.card .c1{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--quiet)}
+.card .c2{font-size:13px;font-weight:600;color:var(--ink)}
+.card .c3{font-size:12px;color:var(--secondary)}
+.seg{display:inline-flex;gap:3px;background:var(--controls);padding:3px;border-radius:8px;border:1px solid var(--edge)}
+.seg button{border:0;background:none;border-radius:5px;padding:7px 12px;font-size:12px;cursor:pointer;color:var(--quiet)}
+.seg button[aria-pressed=true]{background:var(--data);color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgb(0 0 0/.12)}
+
+/* Summary bars */
+.bar{height:8px;background:var(--controls);border-radius:4px;min-width:80px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ink)}
+
+/* Checks */
+.rule{border-top:1px solid var(--edge)}
+.rule:first-child{border-top:0}
+.rule summary{list-style:none;display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer}
+.rule summary::-webkit-details-marker{display:none}
+.rule summary::after{content:'+';margin-left:auto;font-size:18px}
+.rule[open] summary::after{content:'−'}
+.rule summary strong{font-size:14px}
+.rule summary .num{color:var(--quiet);font-size:12px}
+.rule .why{margin:0 18px 10px;font-size:13px;color:var(--quiet)}
+.rule ul{list-style:none;margin:0;padding:0 18px 14px;display:grid;gap:6px}
+.rule li{display:flex;gap:12px;align-items:baseline;font-size:13px;padding:6px 0;border-bottom:1px dashed var(--edge)}
+.rule li .num{flex:0 0 58px}
+.rule li span:last-child{color:var(--quiet);margin-left:auto;text-align:right}
+
+/* Import */
+.drop{display:grid;place-items:center;gap:10px;text-align:center;border:1.5px dashed var(--quiet);border-radius:10px;padding:36px 18px;background:var(--surface);cursor:pointer}
+.drop.over{border-color:var(--ink);background:var(--hover)}
+.drop strong{font-size:18px}
+.diff-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+
+#gate{position:fixed;inset:0;z-index:200;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);background:var(--heading);overflow:auto}
+#gate[hidden]{display:none}
+.g-side{background:#070706;color:#F4F1E9;display:flex;flex-direction:column;padding:40px clamp(28px,4.5vw,72px);min-height:100dvh}
+.g-brand{display:flex;align-items:baseline;gap:14px}
+.g-brand b{font-weight:800;font-size:22px;letter-spacing:-.04em}
+.g-brand span{font-size:10px;letter-spacing:.09em;color:#99968F}
+.g-title{margin:auto 0 0;padding-top:72px;font-weight:800;font-size:clamp(44px,5.6vw,88px);line-height:.96;letter-spacing:-.045em;max-width:9.5em}
+.g-title em{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:400;letter-spacing:-.02em}
+.g-lead{margin:22px 0 0;color:#D1CEC6;font-size:15px;line-height:1.55;max-width:44ch}
+.g-list{list-style:none;margin:44px 0 0;padding:0;border-top:1px solid #26251F;max-width:560px}
+.g-list li{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:baseline;padding:13px 0;border-bottom:1px solid #26251F;font-size:14px}
+.g-list .n{font-family:var(--mono);font-size:11px;color:#99968F}
+.g-list .d{color:#99968F;font-size:12px;text-align:right}
+.g-foot{display:flex;justify-content:space-between;gap:16px;margin-top:40px;font-size:11px;letter-spacing:.04em;color:#99968F}
+.g-foot a{color:#D1CEC6;text-underline-offset:3px}
+.g-main{display:flex;flex-direction:column;justify-content:center;padding:40px clamp(28px,5vw,88px);min-height:100dvh;color:var(--ink)}
+.g-top{display:flex;justify-content:flex-end;margin-bottom:auto}
+.g-top .theme{border-radius:2px}.g-top .theme button{border-radius:1px}
+.g-form{width:100%;max-width:400px;margin:auto 0}
+.g-form .g-kicker{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--quiet);margin:0 0 18px}
+.g-form h1{margin:0 0 12px;font-weight:800;font-size:clamp(34px,3.4vw,48px);line-height:1;letter-spacing:-.04em}
+.g-form p{margin:0 0 30px;color:var(--secondary);font-size:15px;line-height:1.55;max-width:38ch}
+.g-field{display:block;margin-bottom:28px}
+.g-field span{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--quiet);margin-bottom:6px}
+.g-field input{border:0!important;border-bottom:1px solid var(--ink)!important;border-radius:0!important;background:transparent!important;padding:10px 0!important;font-size:18px!important;min-height:48px}
+.g-field input:focus{outline:none;border-bottom-width:2px!important;padding-bottom:9px!important}
+.g-cta{width:100%;min-height:54px;border:0;border-radius:2px;background:var(--lime);color:#070706;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
+.g-cta:hover{filter:brightness(.95)}.g-cta:disabled{opacity:.5;cursor:wait}
+.g-cta:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.g-form .g-msg{min-height:22px;margin:14px 0 0;max-width:none;font-size:13px;color:var(--ink)}
+.g-form .g-note{max-width:none;margin:36px 0 0;padding-top:16px;border-top:1px solid var(--edge);font-size:12px;color:var(--quiet);line-height:1.6}
+.g-form .g-mail{margin:0 0 18px;font-family:var(--mono);font-size:15px;color:var(--ink);word-break:break-all}
+.g-alt{margin-top:8px;border:0;background:none;padding:0;color:var(--ink);font-size:14px;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.g-mobile-foot{display:none}
+@media(max-width:860px){#gate{grid-template-columns:1fr}.g-side{min-height:0;padding:22px 20px 30px}.g-title{padding-top:40px;font-size:clamp(38px,11vw,54px)}.g-lead{font-size:14px}.g-list,.g-foot{display:none}.g-main{min-height:0;padding:28px 20px 40px}.g-top{display:none}.g-form{margin:0}.g-mobile-foot{display:flex;justify-content:space-between;margin-top:40px;font-size:11px;color:var(--quiet)}}
+.side-link{color:#F4F1E9!important;font-size:11px}
+.me{color:#F4F1E9;font-size:12px;margin-bottom:6px}
+.me small{display:block;color:#AAA99F;font-size:10px;letter-spacing:.05em;text-transform:uppercase}
+.loading{padding:60px 18px;text-align:center;color:var(--quiet)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--canvas);border-radius:8px;padding:12px 18px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:100;max-width:90vw}
+#toast.show{opacity:1}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.board{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){
+ .sidebar{display:none;width:min(300px,86vw);border-radius:0 12px 12px 0}
+ .sidebar.open{display:flex;box-shadow:0 0 0 100vmax rgb(0 0 0/.45)}
+ .mobile-close{display:block;align-self:flex-end;min-width:44px;min-height:44px;background:none;border:1px solid #41453A;border-radius:8px;color:#F4F1E9;font-size:22px;margin-bottom:6px;cursor:pointer}
+ .shell{margin:4px;border-radius:10px}
+ .shell>header{padding:10px 12px;gap:8px;flex-wrap:wrap}
+ .menu-btn{display:block}
+ .crumb{display:none}
+ .season span{display:none}
+ .season select{min-width:0}
+ .forn{max-width:none;white-space:normal}
+ main{padding:16px 12px 24px}
+ .eyebrow{padding:16px 16px 8px}.heading{padding:0 16px 18px}
+ .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .kpi{padding:12px}
+ .board{grid-template-columns:1fr}
+ .col{max-height:none}
+ .grid{grid-template-columns:1fr}.grid .w2{grid-column:auto}
+ #drawer{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;margin:0;border-radius:0}
+ .d-top,.d-foot{border-radius:0}
+ .d-body{padding:14px}
+ .timeline li{grid-template-columns:1fr}
+ .diff-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .toolbar label{flex:1 1 140px}
+ .shell>footer{flex-direction:column;gap:4px}
+}
+</style>
+</head>
+<body>
+<aside class="sidebar" id="rail" aria-label="Navigazione">
+ <button class="mobile-close" type="button" aria-label="Chiudi menu" data-close-menu>×</button>
+ <a class="logo" href="#ordini"><span class="wordmark">SPADA</span><span class="logo-sub">COMPANY WORKSPACE</span></a>
+ <div class="ws"><small>STAI LAVORANDO SU</small>Produzione · stagione AI27</div>
+ <span class="nav-label">OPERATIVITÀ</span>
+ <nav class="nav" id="nav"></nav>
+ <div class="side-bottom"><div class="me" id="me"></div><p><button class="link side-link" data-action="backup">Scarica backup Excel</button></p><p><button class="link side-link" data-action="reload">Aggiorna dati</button> · <button class="link side-link" data-action="logout">Esci</button></p></div>
+</aside>
+<div class="shell">
+ <header>
+  <button class="menu-btn" type="button" aria-label="Apri menu" data-open-menu>☰</button>
+  <div class="crumb">Workspace <span>/</span> Produzione <span>/</span> <strong id="crumb">Ordini stagione</strong></div>
+  <label class="season"><span>Stagione</span><select aria-label="Stagione ordine"><option>AI27</option></select></label>
+  <div class="theme" role="group" aria-label="Aspetto"><button type="button" data-theme="ivory" aria-pressed="true">Avorio</button><button type="button" data-theme="dark" aria-pressed="false">Scuro</button></div>
+ </header>
+ <main id="main"></main>
+ <footer><span>Napoli · Italy</span><span>Design &amp; sviluppo <a href="https://librano.it" target="_blank" rel="noopener noreferrer">librano.it</a></span></footer>
+</div>
+<dialog id="drawer" aria-labelledby="d-title"></dialog>
+<dialog id="modal" style="max-width:440px;padding:22px"></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="gate"><aside class="g-side" aria-hidden="false"><div class="g-brand"><b>SPADA</b><span>COMPANY WORKSPACE</span></div><h2 class="g-title">Produzione, ordini e <em>campioni</em>.</h2><p class="g-lead">Lo spazio di lavoro della stagione: articoli, colori, taglie e campionature in un unico posto, aggiornato per tutto il team.</p><ol class="g-list"><li><span class="n">01</span><span>Ordini stagione</span><span class="d">Articoli · colori · taglie</span></li><li><span class="n">02</span><span>Campionature</span><span class="d">PP · shipping · fit</span></li><li><span class="n">03</span><span>Riepiloghi</span><span class="d">Pezzi e valore</span></li><li><span class="n">04</span><span>Controllo errori</span><span class="d">Prima che diventino problemi</span></li></ol><div class="g-foot"><span>Napoli · Italy</span><span>Design &amp; sviluppo <a href="https://librano.it" target="_blank" rel="noopener noreferrer">librano.it ↗</a></span></div></aside><main class="g-main"><div class="g-top"><div class="theme" role="group" aria-label="Aspetto"><button type="button" data-theme="ivory" aria-pressed="true">Avorio</button><button type="button" data-theme="dark" aria-pressed="false">Scuro</button></div></div><div class="g-form" id="gate-card"><p class="g-kicker">Accesso riservato</p><p>Caricamento…</p></div><div class="g-mobile-foot"><span>Napoli · Italy</span><span>librano.it</span></div></main></div>
+
+<script src="/vendor/supabase.js"></script>
+<script src="/config.js"></script>
+<script src="/vendor/xlsx.full.min.js" defer></script>
+<script>
+'use strict';
+const sb=supabase.createClient(window.SPADA_CONFIG.url,window.SPADA_CONFIG.key,{auth:{flowType:'implicit',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+let me=null,members=new Map(),loadedAt=0,loading=false;
+const KEY='spada-produzione';
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nf0=new Intl.NumberFormat('it-IT',{maximumFractionDigits:0,useGrouping:'always'}), nf2=new Intl.NumberFormat('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2,useGrouping:'always'});
+const n0=v=>v==null||v===''?'—':nf0.format(v), n2=v=>v==null||v===''?'—':nf2.format(v);
+const dIT=s=>{if(!s)return '—';const [y,m,d]=s.split('-');return `${d}/${m}/${y.slice(2)}`};
+const clone=o=>JSON.parse(JSON.stringify(o));
+const ESITI={in_attesa:'In attesa',ricevuto:'Da valutare',da_rivedere:'Da rivedere',approvato:'Approvato'};
+const TIPI=['PP','Shipping','Fit','Altro'];
+
+let state={arts:[],log:[]};
+const canEdit=()=>me&&(me.ruolo==='admin'||me.ruolo==='editor');
+const isAdmin=()=>me&&me.ruolo==='admin';
+const who=e=>members.get(e)?.nome||e;
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),3200)}
+
+/* ---------- Regole ---------- */
+function normCode(v){let s=String(v??'').trim();if(/^\d+$/.test(s)&&s.length<5)s=s.padStart(5,'0');return s}
+const SCALE={giacca:{n:'Abiti, giacche, capispalla · 44–60',t:['44','46','48','50','52','54','56','58','60']},pantalone:{n:'Pantaloni · 44–60',t:['44','46','48','50','52','54','56','58','60']},collo:{n:'Camicie collo · 37–46',t:['37','38','39','40','41','42','43','44','45','46']},lettere:{n:'Lettere · S–XXXL',t:['S','M','L','XL','XXL','XXXL']},scarpe:{n:'Scarpe · 39–46',t:['39','40','41','42','43','44','45','46']},tu:{n:'Taglia unica',t:['TU']}};
+const GRUPPO_SCALA={'ABITO':'giacca','GIACCA':'giacca','CAPPOTTO':'giacca','GILET':'giacca','GIUBBOTTERIA':'giacca','GIUBBINI PELLE':'giacca','PANTALONE':'pantalone','PANTALONE CASUAL':'pantalone','PANTALONE CLASSICO':'pantalone','CAMICIA':'collo','CAMICIE SPORTIVE':'lettere','POLO CAMICIA':'lettere','MAGLIA':'lettere','T-SHIRT':'lettere','BOXER INTIMO':'lettere','SCARPE':'scarpe','PANTOFOLA':'scarpe'};
+const LETTER_ORDER=['XXS','XS','S','M','L','XL','XXL','XXXL','3XL','4XL','5XL'];
+function scalaKey(a){return a.scala||GRUPPO_SCALA[String(a.gruppo||'').toUpperCase()]||'tu'}
+function scala(a){const k=scalaKey(a);return k==='custom'?(a.scalaCustom||[]):SCALE[k].t}
+function isTU(a){return scala(a).length<=1}
+const filled=v=>v!=null&&v!=='';
+function hasTg(c){return !!c.taglie&&Object.values(c.taglie).some(filled)}
+function sumTg(c){return Object.values(c.taglie||{}).reduce((s,v)=>s+(+v||0),0)}
+function cq(c){return hasTg(c)?sumTg(c):(+c.ordinato||0)}
+function fuoriScala(a){const sc=scala(a);return [...new Set(a.colori.flatMap(c=>Object.keys(c.taglie||{}).filter(k=>filled(c.taglie[k])&&!sc.includes(k))))]}
+function tgCols(a){return [...scala(a),...fuoriScala(a)]}
+function sizeSort(x,y){const rank=k=>{if(/^\d+(\.\d+)?$/.test(k))return [0,+k];const i=LETTER_ORDER.indexOf(k);if(i>=0)return [1,i];if(k==='TU')return [2,0];if(k==='Taglie non compilate')return [4,0];return [3,0]};const a=rank(x),b=rank(y);return a[0]-b[0]||a[1]-b[1]||String(x).localeCompare(String(y))}
+function tot(a){return a.colori.reduce((s,c)=>s+cq(c),0)}
+function valore(a){return tot(a)*(+a.costoValuta||0)}
+function lastCamp(a,tipo){const l=a.campionature.filter(c=>c.tipo===tipo);if(!l.length)return null;return l.slice().sort((x,y)=>(x.data||'9999').localeCompare(y.data||'9999')).pop()}
+function campState(a,tipo){const c=lastCamp(a,tipo);return c?(c.esito||'ricevuto'):'in_attesa'}
+const LABEL_RE=/^(tessuto|fodera|corpo|fibbia|imbottitura|interno|esterno|suola|soletta|tomaia|rivestimento|collo|polsi|dettagli|upper|outsole|insole|sole|lining|shell|body|buckle|filling)\b/i;
+function parseComp(s){
+ if(!s)return [];const out=[];let cur=null;
+ for(const raw of s.split('|').map(x=>x.trim()).filter(Boolean)){
+  const isLabel=!/\d/.test(raw)&&/\.\s*$/.test(raw)&&(raw.includes('/')||LABEL_RE.test(raw));
+  if(isLabel){cur={label:raw.replace(/\s*\.\s*$/,'').trim(),fibre:[]};out.push(cur);continue}
+  if(!cur){cur={label:'',fibre:[]};out.push(cur)}
+  const m=raw.match(/^(.*?)\s+(\d+(?:[.,]\d+)?)\s*\.?$/);
+  cur.fibre.push(m?{nome:m[1].trim(),pct:+m[2].replace(',','.')}:{nome:raw.replace(/\s*\.\s*$/,''),pct:null});
+ }
+ return out;
+}
+const MATERIALI=['SETA','LANA','COTONE','LINO','PELLE','CASHMERE'];
+const RULES=[
+ {id:'comp',l:'errore',t:'Composizione mancante',why:'Serve per etichette, schede e-commerce e dogana.',test:a=>!a.composizione?'Nessuna composizione':null},
+ {id:'sez',l:'errore',t:'Parte della composizione senza fibre',why:'Es. "Fodera/Lining" indicata ma senza percentuali: va completata o tolta.',test:a=>{const v=parseComp(a.composizione).filter(s=>s.label&&!s.fibre.length).map(s=>s.label);return v.length?v.join(', ')+' vuota':null}},
+ {id:'100',l:'errore',t:'Percentuali che non fanno 100',why:'Ogni parte (tessuto, fodera…) deve sommare al 100%.',test:a=>{const v=parseComp(a.composizione).filter(s=>s.fibre.some(f=>f.pct!=null)).filter(s=>Math.abs(s.fibre.reduce((t,f)=>t+(f.pct||0),0)-100)>.01);return v.length?v.map(s=>`${s.label||'Tessuto'} = ${s.fibre.reduce((t,f)=>t+(f.pct||0),0)}%`).join(', '):null}},
+ {id:'mat',l:'verifica',t:'Descrizione diversa dalla composizione',why:'Il nome cita un materiale che non compare nella composizione.',test:a=>{if(!a.composizione)return null;const d=(a.descrizione||'').toUpperCase(),c=a.composizione.toUpperCase();const m=MATERIALI.filter(w=>new RegExp('\\b'+w+'\\b').test(d)&&!c.includes(w));return m.length?`"${a.descrizione}" ma composizione senza ${m.join(', ')}`:null}},
+ {id:'lista',l:'verifica',t:'Nome diverso tra i due fogli del file',why:'Nel file originale la Lista con colore riporta un nome diverso dal DB.',test:a=>a.descrizioneLista&&a.descrizioneLista!==a.descrizione?`Lista: "${a.descrizioneLista}"`:null},
+ {id:'ship',l:'verifica',t:'Shipping sample OK senza data',why:'Tutti i colori risultano spediti, ma manca la data dello shipping sample.',test:a=>{const c=lastCamp(a,'Shipping');return c&&!c.data&&a.colori.length&&a.colori.every(x=>x.shippingOk)?'Data mancante':null}},
+ {id:'riv',l:'verifica',t:'Campionatura da rivedere',why:'C’è un campione non confermato: serve una nuova campionatura o una decisione.',test:a=>{const t=['PP','Shipping','Fit'].filter(x=>campState(a,x)==='da_rivedere');return t.length?t.join(', ')+' da rivedere':null}},
+ {id:'zero',l:'errore',t:'Colore con quantità zero o vuota',why:'Un colore senza pezzi va tolto o completato.',test:a=>{const z=a.colori.filter(c=>!(cq(c)>0)).map(c=>c.colore||'(senza nome)');return z.length?z.join(', '):null}},
+ {id:'tgdiff',l:'verifica',t:'Taglie diverse dall’ordinato del file',why:'La somma delle taglie non coincide con la quantità del file: controlla che non manchi o non avanzi una taglia.',test:a=>{const d=a.colori.filter(c=>hasTg(c)&&c.ordinatoFile!=null&&sumTg(c)!==c.ordinatoFile).map(c=>`${c.colore}: taglie ${n0(sumTg(c))} · file ${n0(c.ordinatoFile)}`);return d.length?d.join(', '):null}},
+ {id:'tgfuori',l:'verifica',t:'Taglie fuori scala',why:'Ci sono pezzi su taglie che non fanno parte della scala scelta per l’articolo.',test:a=>{const f=fuoriScala(a);return f.length?'Taglie '+f.join(', '):null}},
+ {id:'tg',l:'info',t:'Taglie da compilare',why:'Il colore ha solo il totale: manca la divisione per taglia. Gli articoli in taglia unica non servono.',test:a=>{if(isTU(a))return null;const n=a.colori.filter(c=>!hasTg(c)).length;return n?`${n} di ${a.colori.length} colori senza taglie`:null}},
+ {id:'cost',l:'errore',t:'Costo mancante',why:'Senza costo non si calcola il valore dell’ordine.',test:a=>!(+a.costoValuta>0)?'Costo valuta vuoto':null},
+ {id:'prezzi',l:'verifica',t:'Prezzi incoerenti',why:'Outlet sopra il retail, o retail sotto il costo ivato.',test:a=>{const r=+a.retailNuovo||+a.retail,o=+a.outletNuovo||+a.outlet,ci=+a.costoIvato;const v=[];if(r&&o&&o>r)v.push('outlet > retail');if(r&&ci&&r<ci)v.push('retail < costo ivato');return v.length?v.join(', '):null}},
+ {id:'val',l:'info',t:'Valore ordine del file diverso dal calcolo',why:'Nel file la colonna Val.Ordinato non è pezzi × costo valuta: qui il valore è sempre ricalcolato.',test:a=>{const f=a.colori.reduce((s,c)=>s+(+c.valFile||0),0);if(!f)return null;const d=f-valore(a);return Math.abs(d)>1?`File ${n0(f)} · calcolo ${n0(valore(a))} (${d>0?'+':''}${n0(d)})`:null}},
+];
+function checks(a){return RULES.map(r=>{const m=r.test(a);return m?{rule:r,msg:m}:null}).filter(Boolean)}
+function blocking(a){return checks(a).filter(c=>c.rule.l==='errore')}
+
+/* ---------- Navigazione ---------- */
+const PAGES=[['ordini','Ordini stagione'],['campionature','Campionature'],['riepiloghi','Riepiloghi'],['controlli','Controllo errori'],['importa','Importa da Excel'],['accessi','Accessi']];
+const ICON={home:'M3 10 12 3l9 7v10H3Z M9 20v-7h6v7',prod:'M4 20V8l8-5 8 5v12 M4 12h16 M9 20v-5h6v5',ops:'M3 7h18v13H3Z M3 7l4-4h10l4 4 M8 12h8',tag:'M3 3h8l10 10-8 8L3 11Z M7 7h.01',chat:'M3 4h18v13H9l-6 4Z M7 9h10 M7 13h6'};
+const svg=p=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${p}"/></svg>`;
+let route='ordini';
+function renderNav(){
+ const warn=state.arts.filter(a=>blocking(a).length).length, riv=state.arts.filter(a=>['PP','Shipping','Fit'].some(t=>campState(a,t)==='da_rivedere')).length;
+ const cnt={ordini:state.arts.length,campionature:riv||'',controlli:warn||''};
+ $('#nav').innerHTML=`<span class="off">${svg(ICON.home)}Home<small>CRM</small></span><span class="off">${svg(ICON.ops)}Operatività<small>CRM</small></span><span class="off">${svg(ICON.tag)}Prodotti<small>CRM</small></span>
+ <div><span class="area" style="display:flex;align-items:center;gap:10px;min-height:40px;padding:9px 11px;border:1px solid #343630;border-radius:7px">${svg(ICON.prod)}Produzione</span>
+ <div class="pages">${PAGES.filter(([id])=>id!=='accessi'||isAdmin()).map(([id,l])=>`<a href="#${id}" ${route===id?'aria-current="page"':''}>${esc(l)}<span class="cnt">${cnt[id]??''}</span></a>`).join('')}</div></div>
+ <span class="off">${svg(ICON.chat)}Chat del team<small>CRM</small></span>`;
+}
+function go(){
+ if(!me)return;const h=location.hash.slice(1);route=PAGES.some(p=>p[0]===h)&&(h!=='accessi'||isAdmin())?h:'ordini';
+ $('#crumb').textContent=PAGES.find(p=>p[0]===route)[1];
+ renderNav();renderMe();({ordini:renderOrdini,campionature:renderCamp,riepiloghi:renderRiep,controlli:renderControlli,importa:renderImporta,accessi:renderAccessi})[route]();
+ $('#rail').classList.remove('open');
+}
+window.addEventListener('hashchange',go);
+
+function head(n,title,desc,actions=''){return `<div class="eyebrow">Produzione / ${n}</div><div class="heading"><div><h1>${title}</h1>${desc?`<p>${desc}</p>`:''}</div><div class="actions">${actions}</div></div>`}
+
+/* ---------- Ordini stagione ---------- */
+const F={q:'',gruppo:'',fornitore:'',camp:'',tg:'',avvisi:false,sort:'gruppo',dir:1};
+function opts(list,sel,all){return `<option value="">${all}</option>`+list.map(x=>`<option ${x===sel?'selected':''}>${esc(x)}</option>`).join('')}
+const uniq=k=>[...new Set(state.arts.map(a=>a[k]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'it'));
+function filtered(){
+ const q=F.q.trim().toLowerCase();
+ let l=state.arts.filter(a=>(!q||[a.codice,a.codiceAlt,a.descrizione,a.fornitore,...a.colori.map(c=>c.colore)].join(' ').toLowerCase().includes(q))&&(!F.gruppo||a.gruppo===F.gruppo)&&(!F.fornitore||a.fornitore===F.fornitore)&&(!F.avvisi||checks(a).some(c=>c.rule.l!=='info')));
+ if(F.camp){const [t,s]=F.camp.split(':');l=l.filter(a=>campState(a,t)===s)}
+ if(F.tg==='da')l=l.filter(a=>!isTU(a)&&a.colori.some(c=>!hasTg(c)));else if(F.tg==='ok')l=l.filter(a=>isTU(a)||a.colori.every(hasTg));
+ const key={codice:a=>a.codice,descrizione:a=>a.descrizione||'',gruppo:a=>(a.gruppo||'')+a.codice,fornitore:a=>(a.fornitore||'')+a.codice,ordinato:a=>tot(a),costo:a=>+a.costoValuta||0,valore:a=>valore(a),avvisi:a=>checks(a).filter(c=>c.rule.l!=='info').length}[F.sort];
+ return l.sort((x,y)=>{const a=key(x),b=key(y);return (typeof a==='number'?a-b:String(a).localeCompare(String(b),'it'))*F.dir});
+}
+function renderOrdini(){
+ const A=state.arts,pz=A.reduce((s,a)=>s+tot(a),0),val=A.reduce((s,a)=>s+valore(a),0),col=A.reduce((s,a)=>s+a.colori.length,0);
+ const daVal=A.filter(a=>['PP','Shipping','Fit'].some(t=>['ricevuto','da_rivedere'].includes(campState(a,t)))).length;
+ const err=A.filter(a=>blocking(a).length).length;
+ $('#main').innerHTML=head('01','Ordini stagione AI27','Un articolo, i suoi colori e le campionature in un’unica scheda. Totali, valore e avvisi si calcolano da soli.',canEdit()?`<button class="btn primary" data-action="new">+ Nuovo articolo</button>`:'')+(A.length?'':`<div class="notice" style="margin-bottom:20px"><strong>Il database è vuoto.</strong> ${isAdmin()?'Vai su <a href="#importa">Importa da Excel</a> e carica il file articoli di Gustavo (File_articoli_A2027.xlsx): entrano articoli, colori, costi, composizioni e campionature.':'L’amministratore deve ancora caricare il file articoli.'}</div>`)+
+ `<div class="kpis">
+  <div class="kpi"><span>Articoli</span><strong>${n0(A.length)}</strong><small>${n0(col)} varianti colore</small></div>
+  <div class="kpi"><span>Pezzi ordinati</span><strong>${n0(pz)}</strong><small>somma di tutti i colori</small></div>
+  <div class="kpi"><span>Valore ordine</span><strong>${n0(val)}</strong><small>pezzi × costo valuta</small></div>
+  <button class="kpi" data-goto="campionature"><span>Campionature da seguire</span><strong>${n0(daVal)}</strong><small>da valutare o da rivedere ↗</small></button>
+  <button class="kpi" data-goto="controlli"><span>Articoli con errori</span><strong>${n0(err)}</strong><small>da correggere ↗</small></button>
+ </div>
+ <section class="panel">
+  <div class="toolbar">
+   <label class="search">Cerca<input id="f-q" type="search" placeholder="Codice, nome, fornitore, colore…" value="${esc(F.q)}"></label>
+   <label>Gruppo<select id="f-gruppo">${opts(uniq('gruppo'),F.gruppo,'Tutti')}</select></label>
+   <label>Fornitore<select id="f-fornitore">${opts(uniq('fornitore'),F.fornitore,'Tutti')}</select></label>
+   <label>Campionatura<select id="f-camp"><option value="">Tutte</option>${['PP','Shipping'].map(t=>Object.entries(ESITI).map(([k,v])=>`<option value="${t}:${k}" ${F.camp===t+':'+k?'selected':''}>${t} · ${v}</option>`).join('')).join('')}</select></label>
+   <label>Taglie<select id="f-tg"><option value="">Tutte</option><option value="da" ${F.tg==='da'?'selected':''}>Da compilare</option><option value="ok" ${F.tg==='ok'?'selected':''}>Complete</option></select></label>
+   <label class="check"><input id="f-avvisi" type="checkbox" ${F.avvisi?'checked':''}>Solo con avvisi</label>
+  </div>
+  <div class="table-scroll" id="t-ordini"></div>
+  <div class="table-bottom" id="t-bottom"></div>
+ </section>`;
+ const bind=(id,k,ev='change')=>$('#'+id).addEventListener(ev,e=>{F[k]=e.target.type==='checkbox'?e.target.checked:e.target.value;renderTable()});
+ bind('f-q','q','input');bind('f-gruppo','gruppo');bind('f-fornitore','fornitore');bind('f-camp','camp');bind('f-avvisi','avvisi');bind('f-tg','tg');
+ renderTable();
+}
+function renderTable(){
+ const l=filtered();
+ const th=(k,t,r)=>`<th class="${r?'r':''}" aria-sort="${F.sort===k?(F.dir>0?'ascending':'descending'):'none'}"><button data-sort="${k}">${t}${F.sort===k?(F.dir>0?' ↑':' ↓'):''}</button></th>`;
+ $('#t-ordini').innerHTML=l.length?`<table><thead><tr>${th('codice','Codice')}${th('descrizione','Articolo')}${th('fornitore','Fornitore')}<th>Colori</th>${th('ordinato','Pezzi',1)}${th('costo','Costo',1)}${th('valore','Valore',1)}<th>PP sample</th><th>Shipping</th>${th('avvisi','Avvisi')}</tr></thead><tbody>${l.map(a=>{
+  const ck=checks(a).filter(c=>c.rule.l!=='info'),e=ck.filter(c=>c.rule.l==='errore').length,v=ck.length-e,pp=lastCamp(a,'PP'),sh=lastCamp(a,'Shipping');
+  return `<tr class="click" data-open="${esc(a.codice)}" tabindex="0"><td class="num"><span class="main">${esc(a.codice)}</span><span class="sub">${esc(a.codiceAlt||'')}</span></td><td><span class="main">${esc(a.descrizione)}</span><span class="sub">${esc(a.gruppo||'')} · ${esc(a.stagione||'')}</span></td><td><span class="forn" title="${esc(a.fornitore||'')}">${esc(a.fornitore||'—')}</span></td><td><div class="chips">${a.colori.map(c=>`<span class="chip" title="${n0(cq(c))} pz">${esc(c.colore)}</span>`).join('')}</div></td><td class="r num">${n0(tot(a))}<span class="sub">${isTU(a)?'TU':`taglie ${a.colori.filter(hasTg).length}/${a.colori.length}`}</span></td><td class="r num">${n2(a.costoValuta)}</td><td class="r num">${n0(valore(a))}</td><td><span class="st" data-s="${campState(a,'PP')}">${ESITI[campState(a,'PP')]}</span><span class="sub num">${pp?dIT(pp.data):''}</span></td><td><span class="st" data-s="${campState(a,'Shipping')}">${ESITI[campState(a,'Shipping')]}</span><span class="sub num">${sh?dIT(sh.data):''}</span></td><td>${ck.length?`<span class="flag">${e?`<b>${e} errori</b>`:''}${e&&v?' · ':''}${v?`${v} da verificare`:''}</span>`:'<span class="sub">—</span>'}</td></tr>`}).join('')}</tbody></table>`:`<div class="empty">Nessun articolo con questi filtri. <button class="link" data-action="clear">Azzera filtri</button></div>`;
+ $('#t-bottom').innerHTML=`<span>${n0(l.length)} di ${n0(state.arts.length)} articoli · ${n0(l.reduce((s,a)=>s+tot(a),0))} pezzi · valore ${n0(l.reduce((s,a)=>s+valore(a),0))}</span><span>Clic su una riga per aprire la scheda</span>`;
+}
+
+/* ---------- Scheda articolo ---------- */
+let draft=null,orig=null,isNew=false,dTab='scheda',dirty=false;
+function openArt(code){
+ const a=state.arts.find(x=>x.codice===code);
+ isNew=!a;orig=a||null;
+ draft=a?clone(a):{codice:'',codiceAlt:'',descrizione:'',reparto:'ABBIGLIAMENTO',gruppo:'',tipoEcom:'',appeso:'Appeso',fornitore:'',madeIn:'',rifOrdine:'AI27',stagione:'AI27',dettaglio:'',inventario:'',costoValuta:null,costoFinito:null,costoIvato:null,outlet:null,outletNuovo:null,retail:null,retailNuovo:null,composizione:'',inDB:true,colori:[{colore:'',ordinato:null,evaso:null,valFile:null,shippingOk:false,taglie:{}}],campionature:[],storico:[]};
+ dTab='scheda';dirty=false;renderDrawer();
+ const d=$('#drawer');if(!d.open)d.showModal();
+}
+function fld(k,label,o={}){
+ const v=draft[k]??'';const cls=o.w?` class="${o.w}"`:'';
+ if(o.ro)return `<label${cls}>${label}<span class="ro">${esc(o.ro)}</span></label>`;
+ if(o.sel)return `<label${cls}>${label}<select data-k="${k}">${o.sel.map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('')}</select></label>`;
+ if(o.area)return `<label${cls}>${label}<textarea data-k="${k}" rows="3">${esc(v)}</textarea>${o.after||''}</label>`;
+ return `<label${cls}><span class="${o.req?'req':''}">${label}</span><input data-k="${k}" ${o.num?'inputmode="decimal" data-num="1"':''} ${o.list?`list="dl-${k}"`:''} value="${esc(o.num&&v!==''?String(v).replace('.',','):v)}" ${o.readonly?'readonly':''} ${o.ph?`placeholder="${o.ph}"`:''}>${o.list?`<datalist id="dl-${k}">${uniq(k).map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`:''}</label>`;
+}
+function compPreview(s){const p=parseComp(s);if(!s)return '<div class="comp-preview"><span>Formato: Tessuto/Fabric . | LANA 70 | POLIESTERE 30 | Fodera/Lining . | POLIESTERE 100</span></div>';return `<div class="comp-preview">${p.map(x=>{const sum=x.fibre.reduce((t,f)=>t+(f.pct||0),0),hasPct=x.fibre.some(f=>f.pct!=null);return `<span><b>${esc(x.label||'Tessuto')}</b>: ${x.fibre.length?x.fibre.map(f=>esc(f.nome)+(f.pct!=null?' '+f.pct+'%':'')).join(', '):'<b>vuota</b>'}${hasPct?` · <span class="num">${sum}%</span>${Math.abs(sum-100)>.01?' <b>≠ 100</b>':''}`:''}</span>`}).join('')}</div>`}
+function renderDrawer(){
+ const a=draft,ck=isNew?[]:checks(a),pz=tot(a);
+ const tabs=[['scheda','Scheda'],['colori',`Colori e quantità · ${a.colori.length}`],['camp',`Campionature · ${a.campionature.length}`],['storico','Storico']];
+ let body='';
+ if(dTab==='scheda'){
+  body=`${ck.length?`<div class="notice ${ck.some(c=>c.rule.l==='errore')?'err':''}"><strong>Avvisi su questo articolo</strong><ul style="margin:6px 0 0;padding-left:18px">${ck.map(c=>`<li><span class="lvl" data-l="${c.rule.l}">${c.rule.l.toUpperCase()}</span> ${esc(c.rule.t)} — ${esc(c.msg)}</li>`).join('')}</ul></div>`:''}
+  <section class="sec"><h3>Anagrafica</h3><div class="grid">
+   ${isNew?fld('codice','Codice articolo',{req:1,ph:'es. 02326'}):fld('codice','Codice articolo',{ro:a.codice})}
+   ${fld('codiceAlt','Codice alternativo',{ph:'es. AB2326'})}
+   ${fld('descrizione','Descrizione',{req:1,w:'w2'})}
+   ${fld('reparto','Reparto',{list:1})}${fld('gruppo','Gruppo',{list:1})}${fld('tipoEcom','Tipo e-commerce',{list:1})}${fld('appeso','Appeso / piegato',{sel:['Appeso','Piegato']})}
+   ${fld('fornitore','Fornitore',{list:1,w:'w2'})}${fld('madeIn','Made in',{list:1})}${fld('stagione','Stagione',{list:1})}
+   ${fld('rifOrdine','Rif. ordine')}${fld('dettaglio','Dettaglio',{list:1})}${fld('inventario','Inventario / altro',{w:'w2'})}
+   ${fld('composizione','Composizione',{area:1,w:'w4',after:compPreview(a.composizione)})}
+  </div></section>
+  <section class="sec"><h3>Costi e prezzi</h3><div class="grid">
+   ${fld('costoValuta','Costo valuta',{num:1,req:1})}${fld('costoFinito','Costo finito',{num:1})}<label>Costo finito ivato<span class="ro" data-live="ivato"></span></label>
+   ${fld('outlet','Vendita outlet',{num:1})}${fld('outletNuovo','Nuovo prezzo outlet',{num:1})}${fld('retail','Vendita retail',{num:1})}${fld('retailNuovo','Nuovo retail',{num:1})}
+   <label>Pezzi ordinati<span class="ro" data-live="pz"></span></label><label>Valore ordine<span class="ro" data-live="val"></span></label>
+  </div></section>`;
+ } else if(dTab==='colori'){
+  const cols=tgCols(a),sc=scala(a),sk=scalaKey(a),tu=isTU(a),fs=fuoriScala(a);
+  body=`<section class="sec"><h3>Colori, taglie e quantità</h3>
+  <div class="grid" style="margin-bottom:14px"><label class="w2">Scala taglie<select data-scala>${Object.entries(SCALE).map(([k,v])=>`<option value="${k}" ${k===sk?'selected':''}>${v.n}</option>`).join('')}<option value="custom" ${sk==='custom'?'selected':''}>Personalizzata…</option></select></label>
+  ${sk==='custom'?`<label class="w2">Taglie, separate da virgola<span style="display:flex;gap:8px"><input data-scalacustom value="${esc((a.scalaCustom||[]).join(', '))}" placeholder="es. 85, 90, 95, 100"><button class="btn" type="button" data-action="applyscale">Applica</button></span></label>`:`<p class="w2" style="align-self:end;margin:0 0 10px;color:var(--quiet);font-size:12px">${a.scala?'Scala scelta per questo articolo':'Proposta in base al gruppo '+esc(a.gruppo||'—')}</p>`}</div>
+  <p class="notice">${tu?'<strong>Taglia unica.</strong> Basta il totale per colore.':'<strong>Totale = somma delle taglie.</strong> Scrivi i pezzi per taglia; finché le taglie di un colore sono vuote resta il totale del file.'}</p>
+  ${fs.length?`<p class="notice err"><strong>Taglie fuori scala:</strong> ${esc(fs.join(', '))}. Restano visibili finché non le azzeri.</p>`:''}
+  <div class="table-scroll" style="max-height:none"><table class="mini tg-table"><thead><tr><th>Colore</th>${tu?'':cols.map(t=>`<th class="r"${sc.includes(t)?'':' title="Fuori scala"'}>${esc(t)}${sc.includes(t)?'':' *'}</th>`).join('')}<th class="r">Totale</th><th class="r">Evaso</th><th class="r">Valore</th><th>Ship. OK</th><th></th></tr></thead><tbody>
+  ${a.colori.map((c,i)=>`<tr><td><input data-c="${i}" data-ck="colore" value="${esc(c.colore)}" aria-label="Colore ${i+1}" style="min-width:92px;width:92px"></td>${tu?'':cols.map(t=>`<td class="r"><input class="tg" data-c="${i}" data-tg="${esc(t)}" inputmode="numeric" value="${c.taglie&&filled(c.taglie[t])?c.taglie[t]:''}" aria-label="${esc(c.colore)} taglia ${esc(t)}"></td>`).join('')}<td class="r"><input data-c="${i}" data-ck="ordinato" data-totin="${i}" inputmode="numeric" value="${hasTg(c)?sumTg(c):(c.ordinato??'')}" ${hasTg(c)?'readonly':''} aria-label="Totale ${esc(c.colore)}" style="width:76px;text-align:right"><span class="sub" data-live-diff="${i}"></span></td><td class="r"><input data-c="${i}" data-ck="evaso" inputmode="numeric" value="${c.evaso??''}" aria-label="Pezzi evasi" style="width:64px;text-align:right"></td><td class="r num" data-live-row="${i}"></td><td><input type="checkbox" data-c="${i}" data-ck="shippingOk" ${c.shippingOk?'checked':''} aria-label="Shipping OK"></td><td class="r"><button class="link" data-delcol="${i}" aria-label="Togli colore">Togli</button></td></tr>`).join('')}
+  </tbody><tfoot><tr><td>Totale</td>${tu?'':cols.map(t=>`<td class="r num" data-live-tg="${esc(t)}"></td>`).join('')}<td class="r num" data-live="pz"></td><td class="r num" data-live="ev"></td><td class="r num" data-live="val"></td><td colspan="2"></td></tr></tfoot></table></div>
+  <p><button class="btn" data-action="addcol">+ Aggiungi colore</button></p></section>`;
+ } else if(dTab==='camp'){
+  const l=a.campionature.map((c,i)=>({...c,i})).sort((x,y)=>(y.data||'').localeCompare(x.data||''));
+  body=`<section class="sec"><h3>Nuova campionatura</h3><div class="grid" id="camp-form">
+   <label>Tipo<select name="tipo">${TIPI.map(t=>`<option>${t}</option>`).join('')}</select></label>
+   <label>Data<input type="date" name="data" value="${new Date().toISOString().slice(0,10)}"></label>
+   <label>Esito<select name="esito">${Object.entries(ESITI).filter(([k])=>k!=='in_attesa').map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
+   <label style="align-self:end"><button class="btn" type="button" data-action="addcamp">Aggiungi</button></label>
+   <label class="w4">Nota<input name="nota" placeholder="es. +2 cm posizione tasche, rivedere lunghezza manica"></label></div></section>
+   <section class="sec"><h3>Storico campionature</h3>${l.length?`<ul class="timeline">${l.map(c=>`<li><span class="when">${dIT(c.data)}<br>${esc(c.tipo)}</span><div>${c.esito?`<span class="st" data-s="${c.esito}">${ESITI[c.esito]}</span>`:'<span class="sub">Nota</span>'}${c.nota?`<p>${esc(c.nota)}</p>`:''}</div><button class="link" data-delcamp="${c.i}">Togli</button></li>`).join('')}</ul>`:'<p class="sub">Nessuna campionatura registrata.</p>'}</section>`;
+ } else {
+  body=`<section class="sec"><h3>Storico modifiche</h3><div id="hist" class="loading">${isNew?'Lo storico parte dal primo salvataggio.':'Caricamento…'}</div></section>`;
+ }
+ $('#drawer').innerHTML=`<div class="d-top"><div><span class="eyebrow-s">${isNew?'NUOVO ARTICOLO':esc(a.codice)+' · '+esc(a.gruppo||'')}</span><h2 id="d-title">${esc(a.descrizione||'Nuovo articolo')}</h2></div><button class="d-close" data-action="close" aria-label="Chiudi scheda">×</button></div>
+ <div class="tabs" role="tablist">${tabs.map(([k,l])=>`<button role="tab" aria-selected="${dTab===k}" data-dtab="${k}">${l}</button>`).join('')}</div>
+ <div class="d-body">${body}</div>
+<div class="d-foot"><span class="msg" id="d-msg">${dirty?'Modifiche non salvate':isNew?'Compila codice, descrizione, costo e almeno un colore':'Nessuna modifica'}</span><div class="actions">${!canEdit()?'<span class="msg">Sola consultazione</span><button class="btn" data-action="close">Chiudi</button>':`${!isNew?`<button class="btn ghost" data-action="delart">Elimina articolo</button>`:''}<button class="btn" data-action="close">Annulla</button><button class="btn primary" data-action="saveart" ${dirty||isNew?'':'disabled'}>Salva articolo</button>`}</div></div>`;
+ if(dTab==='storico'&&!isNew)loadHist(a.codice);
+ updateLive();
+}
+function setDirty(){if(!dirty){dirty=true;const m=$('#d-msg');if(m)m.textContent='Modifiche non salvate';const b=$('[data-action=saveart]');if(b)b.disabled=false}}
+function parseNum(v){if(v==null)return null;let s=String(v).trim().replace(/\s/g,'');if(s==='')return null;if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');else if(!/^-?\d+\.\d{1,2}$/.test(s))s=s.replace(/\./g,'');const n=Number(s);return isFinite(n)?n:NaN}
+$('#drawer').addEventListener('input',e=>{
+ const t=e.target;
+ if(t.dataset.k){let v=t.value;if(t.dataset.num){v=parseNum(v);}draft[t.dataset.k]=v;setDirty();if(t.dataset.k==='composizione'){const p=t.parentElement.querySelector('.comp-preview');if(p)p.outerHTML=compPreview(t.value)}}
+ if(t.dataset.tg!==undefined){const c=draft.colori[+t.dataset.c];c.taglie=c.taglie||{};const v=t.value===''?null:parseNum(t.value);if(v==null)delete c.taglie[t.dataset.tg];else c.taglie[t.dataset.tg]=v;setDirty()}
+ if(t.dataset.ck){const c=draft.colori[+t.dataset.c];if(t.readOnly)return;if(t.type==='checkbox')c.shippingOk=t.checked;else if(t.dataset.ck==='colore')c.colore=t.value.toUpperCase();else c[t.dataset.ck]=t.value===''?null:parseNum(t.value);setDirty()}
+ updateLive();
+});
+function updateLive(){if(!draft)return;const a=draft,pz=tot(a),cv=+a.costoValuta||0,set=(k,v)=>$$(`#drawer [data-live=${k}]`).forEach(x=>x.textContent=v);set('pz',n0(pz));set('val',n0(pz*cv));set('ev',n0(a.colori.reduce((s,c)=>s+(+c.evaso||0),0)));set('ivato',a.costoFinito?n2(Math.round(a.costoFinito*122)/100)+' (×1,22)':'—');$$('#drawer [data-live-row]').forEach(x=>{const c=a.colori[+x.dataset.liveRow];x.textContent=c?n0(cq(c)*cv):''});$$('#drawer [data-totin]').forEach(x=>{const c=a.colori[+x.dataset.totin];if(!c)return;if(hasTg(c)){x.readOnly=true;x.value=sumTg(c);x.title='Somma delle taglie'}else{x.readOnly=false;x.title=''}});$$('#drawer [data-live-tg]').forEach(x=>{const k=x.dataset.liveTg;const q=a.colori.reduce((s,c)=>s+(+(c.taglie||{})[k]||0),0);x.textContent=q?n0(q):''});$$('#drawer [data-live-diff]').forEach(x=>{const c=a.colori[+x.dataset.liveDiff];x.textContent=c&&hasTg(c)&&c.ordinatoFile!=null&&sumTg(c)!==c.ordinatoFile?`file ${n0(c.ordinatoFile)}`:''})}
+function renderKeep(){const b=$('#drawer .d-body'),y=b?b.scrollTop:0;renderDrawer();$('#drawer .d-body').scrollTop=y}
+$('#drawer').addEventListener('change',e=>{const t=e.target;if(t.dataset.scala!==undefined){draft.scala=t.value;if(t.value==='custom'&&!draft.scalaCustom?.length)draft.scalaCustom=tgCols({...draft,scala:undefined});setDirty();renderKeep()}});
+$('#drawer').addEventListener('cancel',e=>{e.preventDefault();closeDrawer()});
+function closeDrawer(force){
+ if(dirty&&!force){ask('Uscire senza salvare?','Le modifiche a questa scheda andranno perse.','Esci senza salvare',()=>closeDrawer(true));return}
+ $('#drawer').close();draft=null;dirty=false;
+}
+function ask(title,text,okLabel,ok){const m=$('#modal');m.innerHTML=`<h2 style="margin:0 0 8px;font-size:20px;letter-spacing:-.02em">${esc(title)}</h2><p style="margin:0 0 18px;color:var(--secondary);font-size:14px">${text}</p><div class="actions" style="justify-content:flex-end"><button class="btn" data-m="no">Annulla</button><button class="btn primary" data-m="ok">${esc(okLabel)}</button></div>`;m.showModal();m.onclick=e=>{const b=e.target.closest('[data-m]');if(!b)return;m.close();if(b.dataset.m==='ok')ok()}}
+const LABELS={descrizione:'Descrizione',codiceAlt:'Codice alternativo',reparto:'Reparto',gruppo:'Gruppo',tipoEcom:'Tipo e-commerce',appeso:'Appeso/piegato',fornitore:'Fornitore',madeIn:'Made in',stagione:'Stagione',rifOrdine:'Rif. ordine',dettaglio:'Dettaglio',inventario:'Inventario',composizione:'Composizione',costoValuta:'Costo valuta',costoFinito:'Costo finito',outlet:'Outlet',outletNuovo:'Nuovo outlet',retail:'Retail',retailNuovo:'Nuovo retail'};
+function diffArt(o,n){const d=[];for(const k in LABELS){const a=o[k]??'',b=n[k]??'';if(String(a)!==String(b))d.push(`${LABELS[k]}: ${a===''?'—':a} → ${b===''?'—':b}`)}
+ const oc=Object.fromEntries(o.colori.map(c=>[c.colore,c])),nc=Object.fromEntries(n.colori.map(c=>[c.colore,c]));
+ for(const k in nc){if(!oc[k])d.push(`Colore aggiunto: ${k} (${n0(cq(nc[k]))} pz)`);else{if(cq(oc[k])!==cq(nc[k]))d.push(`${k}: ${n0(cq(oc[k]))} → ${n0(cq(nc[k]))} pz`);{const ot=oc[k].taglie||{},nt=nc[k].taglie||{},ch=[...new Set([...Object.keys(ot),...Object.keys(nt)])].sort(sizeSort).filter(t=>(ot[t]??'')!==(nt[t]??'')).map(t=>`${t} ${filled(ot[t])?ot[t]:'—'}→${filled(nt[t])?nt[t]:'—'}`);if(ch.length)d.push(`${k} taglie: ${ch.join(', ')}`)}if(hasTg(nc[k])&&(oc[k].ordinatoFile??null)!==(nc[k].ordinatoFile??null))d.push(`${k}: ordinato nel file ${n0(oc[k].ordinatoFile)} → ${n0(nc[k].ordinatoFile)} (taglie da riallineare)`);if(!!oc[k].shippingOk!==!!nc[k].shippingOk)d.push(`${k}: shipping ${nc[k].shippingOk?'OK':'non OK'}`)}}
+ for(const k in oc)if(!nc[k])d.push(`Colore tolto: ${k}`);
+ if(scalaKey(o)!==scalaKey(n)||String(o.scalaCustom||'')!==String(n.scalaCustom||''))d.push(`Scala taglie: ${scala(o).join(' ')} → ${scala(n).join(' ')}`);
+ if(o.campionature.length!==n.campionature.length)d.push(`Campionature: ${o.campionature.length} → ${n.campionature.length}`);
+ return d}
+function now(){return new Date().toLocaleString('it-IT',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})}
+function saveArt(){
+ const a=draft,errs=[];
+ a.codice=normCode(a.codice);
+ if(!a.codice)errs.push('Il codice articolo è obbligatorio.');
+ else if(isNew&&state.arts.some(x=>x.codice===a.codice))errs.push(`Il codice ${a.codice} esiste già: aprilo dalla lista per modificarlo.`);
+ if(!String(a.descrizione||'').trim())errs.push('La descrizione è obbligatoria.');
+ for(const k of ['costoValuta','costoFinito','outlet','outletNuovo','retail','retailNuovo'])if(Number.isNaN(a[k]))errs.push(`${LABELS[k]} non è un numero valido.`);
+ if(!(+a.costoValuta>0))errs.push('Inserisci il costo valuta.');
+ a.colori=a.colori.filter(c=>c.colore||c.ordinato||hasTg(c));
+ if(!a.colori.length)errs.push('Aggiungi almeno un colore con la sua quantità.');
+ const names=a.colori.map(c=>(c.colore||'').trim());
+ if(names.some(x=>!x))errs.push('Ogni riga colore deve avere un nome.');
+ const dup=names.filter((x,i)=>x&&names.indexOf(x)!==i);if(dup.length)errs.push(`Colore ripetuto: ${[...new Set(dup)].join(', ')}.`);
+ a.colori.forEach(c=>{for(const [t,v] of Object.entries(c.taglie||{}))if(filled(v)&&(Number.isNaN(v)||v<0||!Number.isInteger(v)))errs.push(`Quantità non valida per ${c.colore||'un colore'} taglia ${t}.`)});
+ a.colori.forEach(c=>{if(hasTg(c))return;if(Number.isNaN(c.ordinato)||(c.ordinato!=null&&(c.ordinato<0||!Number.isInteger(c.ordinato))))errs.push(`Quantità non valida per ${c.colore||'un colore'}.`)});
+ if(errs.length){dTab=['colori'].includes(dTab)?dTab:(errs.some(e=>/colore|Quantità/.test(e))&&!errs.some(e=>/codice|descrizione|costo/i.test(e))?'colori':'scheda');renderDrawer();const b=$('#drawer .d-body');b.insertAdjacentHTML('afterbegin',`<div class="notice err" role="alert"><strong>Non salvato</strong><ul style="margin:6px 0 0;padding-left:18px">${errs.map(e=>`<li>${esc(e)}</li>`).join('')}</ul></div>`);b.scrollTop=0;dirty=true;$('[data-action=saveart]').disabled=false;return}
+ a.colori.forEach(c=>{if(c.taglie)for(const k of Object.keys(c.taglie))if(!filled(c.taglie[k]))delete c.taglie[k];if(hasTg(c))c.ordinato=sumTg(c)});
+ a.costoIvato=a.costoFinito?Math.round(a.costoFinito*122)/100:null;
+ const d=isNew?[]:diffArt(orig,a);
+ if(!isNew&&!d.length){dirty=false;closeDrawer(true);toast('Nessuna modifica da salvare');return}
+ const btn=$('[data-action=saveart]');if(btn){btn.disabled=true;btn.textContent='Salvataggio…'}
+ sb.rpc('salva_articolo',{p_doc:docOf(a),p_versione:isNew?null:orig._v,p_cosa:null,p_dettagli:d}).then(({data,error})=>{
+  if(error){if(btn){btn.disabled=false;btn.textContent='Salva articolo'}
+   const m=/codice_esistente/.test(error.message)?`Il codice ${a.codice} esiste già.`:/conflitto_versione/.test(error.message)?'Nel frattempo qualcun altro ha salvato questo articolo. Chiudi la scheda e riaprila per vedere la versione aggiornata, poi rifai la modifica.':/non_autorizzato|42501/.test(error.message)?'Non hai i permessi per modificare.':'Salvataggio non riuscito: '+error.message;
+   $('#drawer .d-body').insertAdjacentHTML('afterbegin',`<div class="notice err" role="alert"><strong>Non salvato.</strong> ${esc(m)}</div>`);$('#drawer .d-body').scrollTop=0;
+   if(/conflitto_versione/.test(error.message))refreshOne(a.codice);return}
+  a._v=data;a._upd=new Date().toISOString();a._by=me.email;
+  if(isNew)state.arts.push(a);else state.arts[state.arts.findIndex(x=>x.codice===a.codice)]=a;
+  dirty=false;const code=a.codice;closeDrawer(true);go();toast(isNew?`Articolo ${code} creato`:`Articolo ${code} salvato`);
+ });
+}
+
+/* ---------- Campionature ---------- */
+let campTipo='PP';
+function renderCamp(){
+ const cols=['in_attesa','ricevuto','da_rivedere','approvato'];
+ const by=Object.fromEntries(cols.map(c=>[c,[]]));
+ state.arts.forEach(a=>by[campState(a,campTipo)].push(a));
+ const help={in_attesa:'Nessun campione registrato',ricevuto:'Arrivato, manca l’esito',da_rivedere:'Non confermato: serve un nuovo giro',approvato:'Confermato'};
+ $('#main').innerHTML=head('02','Campionature',`Dove si trova ogni articolo nel giro dei campioni. Clic su una scheda per registrare un nuovo esito.`,`<div class="seg" role="group" aria-label="Tipo campionatura">${['PP','Shipping','Fit'].map(t=>`<button data-ctipo="${t}" aria-pressed="${campTipo===t}">${t==='PP'?'PP sample':t==='Shipping'?'Shipping sample':'Fit'}</button>`).join('')}</div>`)+
+ `<div class="board">${cols.map(c=>{const l=by[c].sort((x,y)=>{const a=lastCamp(x,campTipo)?.data||'',b=lastCamp(y,campTipo)?.data||'';return b.localeCompare(a)||x.codice.localeCompare(y.codice)});return `<section class="col" aria-label="${ESITI[c]}"><h3><span class="st" data-s="${c}">${ESITI[c]}</span><span class="num">${l.length}</span></h3><div class="list"><p class="sub" style="margin:0 2px 4px;font-size:12px;color:var(--quiet)">${help[c]}</p>${l.slice(0,c==='in_attesa'?60:500).map(a=>{const lc=lastCamp(a,campTipo);return `<button class="card" data-open="${esc(a.codice)}" data-dtab-open="camp"><span class="c1"><span class="num">${esc(a.codice)}</span><span class="num">${lc?dIT(lc.data):''}</span></span><span class="c2">${esc(a.descrizione)}</span>${lc?.nota?`<span class="c3">${esc(lc.nota)}</span>`:`<span class="c3">${esc(a.gruppo||'')} · ${n0(tot(a))} pz</span>`}</button>`}).join('')}${c==='in_attesa'&&l.length>60?`<p class="sub" style="font-size:12px;color:var(--quiet)">…e altri ${l.length-60}. Usa il filtro Campionatura in Ordini stagione.</p>`:''}</div></section>`}).join('')}</div>`;
+}
+
+/* ---------- Riepiloghi ---------- */
+let riepBy='gruppo';
+const RIEP={gruppo:['Gruppo',a=>a.gruppo],fornitore:['Fornitore',a=>a.fornitore],reparto:['Reparto',a=>a.reparto],madeIn:['Made in',a=>a.madeIn],stagione:['Stagione',a=>a.stagione],ship:['Mese shipping sample',a=>{const c=lastCamp(a,'Shipping');return c?.data?c.data.slice(0,7):'Senza data'}],ppstato:['Stato PP sample',a=>ESITI[campState(a,'PP')]],taglia:['Taglia',null]};
+function riepRows(){
+ if(riepBy==='taglia'){const m=new Map(),add=(k,a,q)=>{const r=m.get(k)||{k,arts:new Set(),col:0,pz:0,val:0};r.arts.add(a.codice);r.col++;r.pz+=q;r.val+=q*(+a.costoValuta||0);m.set(k,r)};
+  for(const a of state.arts)for(const c of a.colori){if(isTU(a))add('TU',a,cq(c));else if(hasTg(c)){for(const [t,v] of Object.entries(c.taglie))if(+v>0)add(t,a,+v)}else add('Taglie non compilate',a,cq(c))}
+  return [...m.values()].map(r=>({...r,art:r.arts.size})).sort((x,y)=>sizeSort(x.k,y.k))}
+ const m=new Map();for(const a of state.arts){const k=RIEP[riepBy][1](a)||'—';const r=m.get(k)||{k,art:0,col:0,pz:0,val:0};r.art++;r.col+=a.colori.length;r.pz+=tot(a);r.val+=valore(a);m.set(k,r)}
+ return [...m.values()].sort((a,b)=>riepBy==='ship'?a.k.localeCompare(b.k):b.val-a.val)}
+function renderRiep(){
+ const rows=riepRows(),T=rows.reduce((t,r)=>({art:t.art+r.art,col:t.col+r.col,pz:t.pz+r.pz,val:t.val+r.val}),{art:0,col:0,pz:0,val:0}),max=Math.max(...rows.map(r=>r.val),1);
+ const lab=k=>riepBy==='ship'&&/^\d{4}-\d{2}$/.test(k)?new Date(k+'-01').toLocaleDateString('it-IT',{month:'long',year:'numeric'}):k;
+ $('#main').innerHTML=head('03','Riepiloghi','Al posto della tabella pivot: sempre aggiornati, comprendono anche gli articoli aggiunti dopo.',`<button class="btn" data-action="copyriep">Copia per Excel</button>`)+
+ `<section class="panel"><div class="toolbar"><label>Raggruppa per<select id="r-by">${Object.entries(RIEP).map(([k,[l]])=>`<option value="${k}" ${k===riepBy?'selected':''}>${l}</option>`).join('')}</select></label></div>
+ <div class="table-scroll"><table><thead><tr><th>${RIEP[riepBy][0]}</th><th class="r">Articoli</th><th class="r">${riepBy==='taglia'?'Righe colore':'Colori'}</th><th class="r">Pezzi</th><th class="r">Valore</th><th class="r">% valore</th><th style="width:22%"><span class="sr">Grafico</span></th></tr></thead><tbody>${rows.map(r=>`<tr><td><span class="main">${esc(lab(r.k))}</span></td><td class="r num">${n0(r.art)}</td><td class="r num">${n0(r.col)}</td><td class="r num">${n0(r.pz)}</td><td class="r num">${n0(r.val)}</td><td class="r num">${n2(r.val/T.val*100)}%</td><td><div class="bar"><i style="width:${(r.val/max*100).toFixed(1)}%"></i></div></td></tr>`).join('')}</tbody><tfoot><tr><td>Totale</td><td class="r num">${riepBy==='taglia'?n0(state.arts.length):n0(T.art)}</td><td class="r num">${n0(T.col)}</td><td class="r num">${n0(T.pz)}</td><td class="r num">${n0(T.val)}</td><td class="r num">100%</td><td></td></tr></tfoot></table></div>
+ <div class="table-bottom"><span>${riepBy==='taglia'?'Le taglie compaiono man mano che vengono compilate; il resto è in «Taglie non compilate»':'Valore = pezzi × costo valuta, ricalcolato su ogni articolo'}</span><span>${rows.length} righe</span></div></section>`;
+ $('#r-by').addEventListener('change',e=>{riepBy=e.target.value;renderRiep()});
+}
+
+/* ---------- Controlli ---------- */
+function renderControlli(){
+ const res=RULES.map(r=>({r,items:state.arts.map(a=>({a,m:r.test(a)})).filter(x=>x.m)}));
+ const cnt=l=>res.filter(x=>x.r.l===l).reduce((s,x)=>s+x.items.length,0);
+ const clean=state.arts.filter(a=>!checks(a).some(c=>c.rule.l!=='info')).length;
+ $('#main').innerHTML=head('04','Controllo errori','Le stesse verifiche che oggi si fanno a occhio, eseguite su ogni articolo a ogni modifica e prima di ogni importazione.')+
+ `<div class="kpis" style="grid-template-columns:repeat(4,minmax(0,1fr))"><div class="kpi"><span>Errori</span><strong>${cnt('errore')}</strong><small>da correggere</small></div><div class="kpi"><span>Da verificare</span><strong>${cnt('verifica')}</strong><small>controllo umano</small></div><div class="kpi"><span>Informazioni</span><strong>${cnt('info')}</strong><small>differenze col file</small></div><div class="kpi"><span>Articoli in ordine</span><strong>${clean}</strong><small>su ${state.arts.length}</small></div></div>
+ <section class="panel">${res.map(({r,items})=>`<details class="rule" ${items.length&&r.l==='errore'?'':''}><summary><span class="lvl" data-l="${r.l}">${r.l.toUpperCase()}</span><strong>${esc(r.t)}</strong><span class="num">${items.length?items.length+' articoli':'nessuno ✓'}</span></summary><p class="why">${esc(r.why)}</p>${items.length?`<ul>${items.map(({a,m})=>`<li><span class="num">${esc(a.codice)}</span><button class="link" data-open="${esc(a.codice)}">${esc(a.descrizione)}</button><span>${esc(m)}</span></li>`).join('')}</ul>`:''}</details>`).join('')}</section>`;
+}
+
+/* ---------- Import ---------- */
+let imp=null;
+function renderImporta(){
+ $('#main').innerHTML=head('05','Importa da Excel','Carica il file articoli (foglio «Lista con colore») o un nuovo file del fornitore con le stesse colonne. Prima di cambiare qualcosa vedi cosa entra, cosa cambia e cosa non torna.')+
+ `<section class="panel" style="padding:18px"><label class="drop" id="drop"><input type="file" id="file" accept=".xlsx,.xls,.csv" class="sr"><strong>Trascina qui il file Excel</strong><span class="sub" style="color:var(--quiet)">oppure clicca per sceglierlo · .xlsx</span></label>
+ <p class="sub" style="color:var(--quiet);font-size:12px;margin:12px 0 0">Colonne lette: Codice Articolo, Descrizione Articolo, colore, Ordinato, Costo valuta, Fornitore, Gruppo, Composizione, SHIPPING, prezzi… Se il file ha anche una colonna <strong>Taglia</strong> (una riga per articolo, colore e taglia) le taglie vengono caricate; se non c’è, le taglie già compilate qui restano. Campionature e note già registrate non vengono toccate. Se il file contiene anche il foglio «DB_Articoli» (come quello di Gustavo), per gli articoli nuovi vengono lette anche descrizioni, note e date dei campioni.</p>${canEdit()?'':'<p class="notice" style="margin-top:12px">Hai la sola consultazione: puoi vedere il confronto ma non applicarlo.</p>'}</section><div id="imp-res"></div>`;
+ const f=$('#file'),d=$('#drop');
+ f.addEventListener('change',()=>f.files[0]&&readFile(f.files[0]));
+ ['dragover','dragenter'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.add('over')}));
+ ['dragleave','drop'].forEach(ev=>d.addEventListener(ev,e=>{e.preventDefault();d.classList.remove('over')}));
+ d.addEventListener('drop',e=>e.dataTransfer.files[0]&&readFile(e.dataTransfer.files[0]));
+ if(imp)renderImp();
+}
+function readFile(file){
+ if(!window.XLSX){toast('Lettore Excel non ancora caricato, riprova tra un attimo');return}
+ const r=new FileReader();r.onload=()=>{try{const wb=XLSX.read(r.result,{type:'array'});imp=analyze(wb,file.name);renderImp()}catch(err){$('#imp-res').innerHTML=`<div class="notice err" role="alert"><strong>File non leggibile.</strong> ${esc(err.message)}</div>`}};r.readAsArrayBuffer(file);
+}
+function analyze(wb,name){
+ const want=['Codice Articolo','colore','Ordinato'];
+ let sheet=wb.SheetNames.find(s=>s.toLowerCase()==='lista con colore')||wb.SheetNames.find(s=>{const h=(XLSX.utils.sheet_to_json(wb.Sheets[s],{header:1})[0]||[]).map(String);return want.every(w=>h.includes(w))});
+ if(!sheet)throw new Error('Non trovo un foglio con le colonne Codice Articolo, colore e Ordinato.');
+ const rows=XLSX.utils.sheet_to_json(wb.Sheets[sheet],{defval:null,raw:true});
+ const errs=[],map=new Map(),seen=new Set();
+ const num=v=>v==null||v===''?null:typeof v==='number'?v:parseNum(v);
+ const tgKey=Object.keys(rows[0]||{}).find(k=>/^(taglia|size|tg)$/i.test(k.trim()));
+ rows.forEach((r,i)=>{
+  const riga=i+2,code=normCode(r['Codice Articolo']);if(!code)return;
+  const col=String(r['colore']??'').trim().toUpperCase();
+  const tg=tgKey?String(r[tgKey]??'').trim().toUpperCase():'';
+  if(!/^\d{5}$/.test(code))errs.push(`Riga ${riga}: codice «${code}» non è di 5 cifre`);
+  if(!col)errs.push(`Riga ${riga} (${code}): colore vuoto`);
+  const sk=code+'|'+col+'|'+tg;if(seen.has(sk))errs.push(`Riga ${riga}: ${code} ${col}${tg?' taglia '+tg:''} ripetuto`);seen.add(sk);
+  const q=num(r['Ordinato']);if(q==null||Number.isNaN(q))errs.push(`Riga ${riga} (${code} ${col}): quantità non valida`);
+  let a=map.get(code);const cv=num(r['Costo valuta']);
+  if(!a){a={codice:code,codiceAlt:r['Codice Alternativo'],descrizione:String(r['Descrizione Articolo']??'').trim(),reparto:r['Reparto'],gruppo:r['Gruppo'],tipoEcom:r['Product type ecommerce'],appeso:r['Appeso-Piegato'],fornitore:r['Fornitore Articolo'],madeIn:r['Made in'],rifOrdine:r['Rif. Ordine'],stagione:r['Stagione'],dettaglio:r['dettaglio'],inventario:r['Altro'],costoValuta:cv,costoFinito:num(r['Costo finito']),costoIvato:num(r['Costo F. ivato']),outlet:num(r['Vendita outlet']),outletNuovo:num(r['Nuovo prezzo']),retail:num(r['Vendita retail']),retailNuovo:num(r['nuovo retail']),composizione:r['Composizione']?String(r['Composizione']).trim():'',colori:[],campionature:[]};map.set(code,a)}
+  else if(cv!=null&&a.costoValuta!=null&&Math.abs(cv-a.costoValuta)>.001)errs.push(`${code}: costo diverso tra i colori (${n2(a.costoValuta)} / ${n2(cv)})`);
+  let c=tgKey?a.colori.find(x=>x.colore===col):null;
+  if(!c){c={colore:col,ordinato:0,ordinatoFile:0,evaso:null,valFile:null,shippingOk:String(r['SHIPPING']??'').trim().toUpperCase()==='OK'};if(tgKey)c.taglie={};a.colori.push(c)}
+  const qq=+q||0;c.ordinato+=qq;c.ordinatoFile+=qq;const ev=num(r['Evaso']),vf=num(r['Val.Ordinato']);if(ev!=null)c.evaso=(c.evaso||0)+ev;if(vf!=null)c.valFile=(c.valFile||0)+vf;
+  if(tgKey){if(tg){c.taglie[tg]=(c.taglie[tg]||0)+qq;c._t=1}else c._n=1}
+ });
+ for(const a of map.values())for(const c of a.colori){if(c._t&&c._n)errs.push(`${a.codice} ${c.colore}: righe con e senza taglia`);delete c._t;delete c._n;if(c.taglie&&!Object.keys(c.taglie).length)delete c.taglie}
+ const dbSheet=wb.SheetNames.find(x=>x.toLowerCase()==='db_articoli');
+ if(dbSheet){const iso=v=>{if(v==null||v==='')return null;if(typeof v==='number'){const p=XLSX.SSF.parse_date_code(v);return p?`${p.y}-${String(p.m).padStart(2,'0')}-${String(p.d).padStart(2,'0')}`:null}const m=String(v).match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);if(!m)return null;const y=m[3].length===2?'20'+m[3]:m[3];return `${y}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`};
+  for(const r of XLSX.utils.sheet_to_json(wb.Sheets[dbSheet],{defval:null,raw:true})){const a=map.get(normCode(r['Codice Articolo']));if(!a)continue;
+   const dd=String(r['Descrizione Articolo']??'').trim();if(dd&&dd!==a.descrizione){a.descrizioneLista=a.descrizione;a.descrizione=dd}
+   a.inDB=true;const nota=r['Nota']?String(r['Nota']).trim():null,nl=(nota||'').toLowerCase();let pp=iso(r['PP SAMPLE']);const sh=iso(r['SHIPPING SAMPLE']);
+   const mm=(nota||'').match(/^\s*(\d{2})[-\/](\d{2})[-\/](\d{2})/);const nd=mm?`20${mm[3]}-${mm[2]}-${mm[1]}`:null;if(!pp&&nl.includes('pp sample'))pp=nd;
+   const camp=[];
+   if(pp)camp.push({tipo:'PP',data:pp,esito:nl.includes('pp sample ok')?'approvato':/pp sample (non|no) co/.test(nl)?'da_rivedere':'ricevuto',nota:nl.includes('pp')?nota:null});
+   const all=a.colori.length&&a.colori.every(c=>c.shippingOk),any=a.colori.some(c=>c.shippingOk);
+   if(sh||all||any)camp.push({tipo:'Shipping',data:sh,esito:nl.includes('shipping sample non confermato')?'da_rivedere':all?'approvato':'ricevuto',nota:(nl.includes('shipping')||nl.includes('contrasto'))?nota:null});
+   if(nota&&!camp.some(c=>c.nota))camp.push({tipo:'Nota',data:null,esito:null,nota});
+   a.campionature=camp;a._campDaFile=true}}
+ for(const a of map.values())if(!a.campionature.length&&a.colori.some(c=>c.shippingOk)){const all=a.colori.every(c=>c.shippingOk);a.campionature.push({tipo:'Shipping',data:null,esito:all?'approvato':'ricevuto',nota:null})}
+ for(const a of map.values()){const sz=[...new Set(a.colori.flatMap(c=>Object.keys(c.taglie||{})))];if(sz.length&&!sz.every(t=>scala(a).includes(t))){const def=scala(a);a.scala='custom';a.scalaCustom=[...new Set([...def.filter(t=>sz.includes(t)),...sz])].sort(sizeSort)}}
+ for(const a of map.values())delete a._campDaFile;
+ const cur=new Map(state.arts.map(a=>[a.codice,a])),nuovi=[],mod=[],ug=[];
+ for(const a of map.values()){const o=cur.get(a.codice);if(!o){nuovi.push(a);continue}
+  const m=Object.assign(clone(o),Object.fromEntries(Object.entries(a).filter(([k,v])=>!['campionature','colori'].includes(k)&&v!=null&&v!=='')),{colori:a.colori.map(c=>{const oc=o.colori.find(x=>x.colore===c.colore)||{};const m={...oc,...c};if(!c.taglie&&oc.taglie)m.taglie=oc.taglie;if(hasTg(m))m.ordinato=sumTg(m);return m})});
+  const d=diffArt(o,m).filter(x=>!x.startsWith('Campionature'));d.length?mod.push({o,m,d}):ug.push(a)}
+ const assenti=state.arts.filter(a=>!map.has(a.codice));
+ return {name,sheet,righe:rows.length,nuovi,mod,ug,assenti,errs};
+}
+function renderImp(){
+ const i=imp;
+ $('#imp-res').innerHTML=`<div class="diff-kpis"><div class="kpi"><span>Articoli nuovi</span><strong>${i.nuovi.length}</strong><small>verranno aggiunti</small></div><div class="kpi"><span>Articoli modificati</span><strong>${i.mod.length}</strong><small>quantità, costi o dati</small></div><div class="kpi"><span>Invariati</span><strong>${i.ug.length}</strong><small>nessuna differenza</small></div><div class="kpi"><span>Problemi nel file</span><strong>${i.errs.length}</strong><small>da sistemare prima</small></div></div>
+ <section class="panel"><div class="toolbar" style="justify-content:space-between;align-items:center"><span><strong>${esc(i.name)}</strong> · foglio «${esc(i.sheet)}» · ${n0(i.righe)} righe</span><div class="actions"><button class="btn" data-action="impcancel">Annulla</button>${canEdit()?`<button class="btn primary" data-action="impapply" ${i.errs.length||(!i.nuovi.length&&!i.mod.length)?'disabled':''}>Applica importazione</button>`:''}</div></div>
+ <div style="padding:6px 0">
+ ${i.errs.length?`<details class="rule" open><summary><span class="lvl" data-l="errore">ERRORE</span><strong>Problemi nel file</strong><span class="num">${i.errs.length}</span></summary><p class="why">Correggi il file e ricaricalo: finché ci sono problemi l’importazione resta bloccata.</p><ul>${i.errs.slice(0,200).map(e=>`<li>${esc(e)}</li>`).join('')}</ul></details>`:''}
+ <details class="rule" ${i.nuovi.length?'open':''}><summary><span class="lvl">NUOVI</span><strong>Articoli che entrano</strong><span class="num">${i.nuovi.length}</span></summary><ul>${i.nuovi.map(a=>`<li><span class="num">${esc(a.codice)}</span><span>${esc(a.descrizione)}</span><span>${a.colori.length} colori · ${n0(tot(a))} pz${checks(a).some(c=>c.rule.l==='errore')?' · con avvisi':''}</span></li>`).join('')}</ul></details>
+ <details class="rule"><summary><span class="lvl">MODIFICHE</span><strong>Articoli che cambiano</strong><span class="num">${i.mod.length}</span></summary><ul>${i.mod.map(x=>`<li style="display:block"><span class="num">${esc(x.o.codice)}</span> <strong>${esc(x.o.descrizione)}</strong><br><span style="color:var(--secondary)">${x.d.map(esc).join(' · ')}</span></li>`).join('')}</ul></details>
+ ${i.assenti.length?`<details class="rule"><summary><span class="lvl">INFO</span><strong>Articoli qui ma non nel file</strong><span class="num">${i.assenti.length}</span></summary><p class="why">Non vengono cancellati: l’import aggiunge e aggiorna, non elimina.</p><ul>${i.assenti.map(a=>`<li><span class="num">${esc(a.codice)}</span><span>${esc(a.descrizione)}</span></li>`).join('')}</ul></details>`:''}
+ </div></section>`;
+}
+async function applyImp(){
+ const i=imp,btn=$('[data-action=impapply]');if(btn){btn.disabled=true;btn.textContent='Importazione…'}
+ const {data,error}=await sb.rpc('importa_articoli',{p_file:i.name,p_nuovi:i.nuovi.map(docOf),p_modifiche:i.mod.map(({o,m,d})=>({doc:docOf(m),versione:o._v,dettagli:d}))});
+ if(error){if(btn){btn.disabled=false;btn.textContent='Applica importazione'}const m=/conflitto_versione/.test(error.message)?'Qualcuno ha modificato degli articoli mentre preparavi l’importazione. Ricarica il file per rifare il confronto.':/codice_esistente/.test(error.message)?'Alcuni articoli sono stati creati nel frattempo da un altro utente. Ricarica il file.':'Importazione non riuscita: '+error.message;$('#imp-res').insertAdjacentHTML('afterbegin',`<div class="notice err" role="alert"><strong>Nessuna modifica applicata.</strong> ${esc(m)}</div>`);await loadAll(true);return}
+ toast(`Importati ${data.nuovi} nuovi e ${data.modificati} modificati`);imp=null;await loadAll(true);location.hash='ordini';go();
+}
+
+/* ---------- Database ---------- */
+function docOf(a){const d=clone(a);delete d._v;delete d._upd;delete d._by;delete d.storico;return d}
+function fromRow(r){return {...r.doc,_v:r.versione,_upd:r.aggiornato_il,_by:r.aggiornato_da}}
+async function loadAll(force){
+ if(loading)return;loading=true;
+ try{
+  const out=[];for(let from=0;;from+=1000){const {data,error}=await sb.from('articoli').select('codice,doc,versione,aggiornato_il,aggiornato_da').order('codice').range(from,from+999);if(error)throw error;out.push(...data);if(data.length<1000)break}
+  state.arts=out.map(fromRow);loadedAt=Date.now();await loadMembers();
+ }catch(err){toast('Errore nel caricamento: '+(err.message||err))}finally{loading=false}
+}
+async function loadMembers(){const {data}=await sb.from('membri').select('email,nome,ruolo').order('email');members=new Map((data||[]).map(m=>[m.email,m]))}
+async function refreshOne(code){const {data}=await sb.from('articoli').select('codice,doc,versione,aggiornato_il,aggiornato_da').eq('codice',code).maybeSingle();const k=state.arts.findIndex(x=>x.codice===code);if(data){if(k>=0)state.arts[k]=fromRow(data);else state.arts.push(fromRow(data))}else if(k>=0)state.arts.splice(k,1)}
+async function loadHist(code){
+ const {data,error}=await sb.from('storico').select('quando,chi,cosa,dettagli,versione').eq('codice',code).order('quando',{ascending:false}).limit(50);
+ const el=$('#hist');if(!el)return;
+ if(error){el.textContent='Storico non disponibile: '+error.message;return}
+ el.classList.remove('loading');
+ el.innerHTML=data.length?`<ul class="hist" style="list-style:none;margin:0;padding:0">${data.map(r=>`<li><span class="num">${new Date(r.quando).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})}</span> · <strong>${esc(who(r.chi))}</strong> · ${esc(r.cosa)}${r.versione?` <span class="sub" style="display:inline">· v${r.versione}</span>`:''}${Array.isArray(r.dettagli)&&r.dettagli.length?`<ul>${r.dettagli.map(x=>`<li style="border:0;padding:2px 0">${esc(x)}</li>`).join('')}</ul>`:''}</li>`).join('')}</ul>`:'<p class="sub">Nessuna modifica registrata.</p>';
+}
+function renderMe(){const m=members.get(me.email);$('#me').innerHTML=`${esc(m?.nome||me.email)}<small>${me.ruolo==='admin'?'Amministratore':me.ruolo==='editor'?'Modifica':'Sola lettura'}</small>`}
+
+/* ---------- Accessi ---------- */
+function renderAccessi(){
+ if(!isAdmin()){location.hash='ordini';return}
+ const l=[...members.values()];
+ $('#main').innerHTML=head('06','Accessi','Solo questi indirizzi possono entrare. Ognuno accede con la propria email: riceve un link e lo apre.')+
+ `<section class="panel"><div class="toolbar"><label class="search">Email<input id="m-email" type="email" placeholder="nome@spadaroma.com"></label><label>Nome<input id="m-nome" placeholder="es. Gustavo"></label><label>Permesso<select id="m-ruolo"><option value="editor">Modifica</option><option value="lettura">Sola lettura</option><option value="admin">Amministratore</option></select></label><label style="align-self:end"><button class="btn primary" data-action="addmember">Aggiungi</button></label></div>
+ <div class="table-scroll"><table><thead><tr><th>Email</th><th>Nome</th><th>Permesso</th><th></th></tr></thead><tbody>${l.map(m=>`<tr><td><span class="main">${esc(m.email)}</span></td><td>${esc(m.nome||'—')}</td><td>${m.ruolo==='admin'?'Amministratore':m.ruolo==='editor'?'Modifica':'Sola lettura'}</td><td class="r">${m.email===me.email?'<span class="sub">Tu</span>':`<button class="link" data-action="delmember" data-email="${esc(m.email)}">Togli accesso</button>`}</td></tr>`).join('')}</tbody></table></div>
+ <div class="table-bottom"><span>${l.length} persone autorizzate</span><span>Per cambiare il permesso di qualcuno, aggiungilo di nuovo con il permesso giusto</span></div></section>`;
+}
+async function addMember(){
+ const email=$('#m-email').value.trim(),nome=$('#m-nome').value.trim(),ruolo=$('#m-ruolo').value;
+ if(!email){toast('Scrivi l’email');return}
+ const {error}=await sb.rpc('salva_membro',{p_email:email,p_nome:nome,p_ruolo:ruolo});
+ if(error){toast(/email_non_valida/.test(error.message)?'Email non valida':/non_puoi/.test(error.message)?'Non puoi toglierti il ruolo di amministratore':'Non riuscito: '+error.message);return}
+ await loadMembers();renderAccessi();toast(`${email} può entrare`);
+}
+
+/* ---------- Backup Excel ---------- */
+function backup(){
+ if(!window.XLSX){toast('Un attimo, riprova');return}
+ const righe=[],art=[],camp=[];
+ for(const a of state.arts){
+  art.push({'Codice Articolo':a.codice,'Codice Alternativo':a.codiceAlt,'Descrizione Articolo':a.descrizione,'Reparto':a.reparto,'Gruppo':a.gruppo,'Product type ecommerce':a.tipoEcom,'Appeso-Piegato':a.appeso,'Fornitore Articolo':a.fornitore,'Made in':a.madeIn,'Rif. Ordine':a.rifOrdine,'Stagione':a.stagione,'dettaglio':a.dettaglio,'Altro':a.inventario,'Costo valuta':a.costoValuta,'Costo finito':a.costoFinito,'Costo F. ivato':a.costoIvato,'Vendita outlet':a.outlet,'Nuovo prezzo':a.outletNuovo,'Vendita retail':a.retail,'nuovo retail':a.retailNuovo,'Composizione':a.composizione,'Scala taglie':scala(a).join(' '),'Pezzi':tot(a),'Valore':valore(a),'Versione':a._v,'Ultima modifica':a._upd?new Date(a._upd).toLocaleString('it-IT'):'','Modificato da':a._by?who(a._by):''});
+  for(const c of a.colori){
+   const base={'Codice Articolo':a.codice,'Codice Alternativo':a.codiceAlt,'Descrizione Articolo':a.descrizione,'Reparto':a.reparto,'Gruppo':a.gruppo,'Product type ecommerce':a.tipoEcom,'Appeso-Piegato':a.appeso,'Fornitore Articolo':a.fornitore,'SHIPPING':c.shippingOk?'OK':'','colore':c.colore};
+   const tail={'Costo valuta':a.costoValuta,'Costo finito':a.costoFinito,'Costo F. ivato':a.costoIvato,'Vendita outlet':a.outlet,'Nuovo prezzo':a.outletNuovo,'Vendita retail':a.retail,'nuovo retail':a.retailNuovo,'Made in':a.madeIn,'Rif. Ordine':a.rifOrdine,'Altro':a.inventario,'dettaglio':a.dettaglio,'Stagione':a.stagione,'Composizione':a.composizione};
+   if(hasTg(c))for(const t of Object.keys(c.taglie).sort(sizeSort)){if(filled(c.taglie[t]))righe.push({...base,'Taglia':t,'Ordinato':+c.taglie[t],...tail})}
+   else righe.push({...base,'Taglia':'','Ordinato':cq(c),'Evaso':c.evaso,...tail});
+  }
+  for(const k of a.campionature)camp.push({'Codice Articolo':a.codice,'Descrizione Articolo':a.descrizione,'Tipo':k.tipo,'Data':k.data,'Esito':k.esito?ESITI[k.esito]:'','Nota':k.nota});
+ }
+ const wb=XLSX.utils.book_new();
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(righe),'Lista con colore');
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(art),'Articoli');
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(camp),'Campionature');
+ const d=new Date(),p=n=>String(n).padStart(2,'0');
+ XLSX.writeFile(wb,`SPADA_backup_${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}.xlsx`);
+ toast('Backup scaricato: il foglio «Lista con colore» si può reimportare');
+}
+
+/* ---------- Accesso ---------- */
+function gate(stato,info){
+ const g=$('#gate'),c=$('#gate-card');g.hidden=false;
+ const k='<p class="g-kicker">Accesso riservato · Team Spada</p>';
+ if(stato==='login')c.innerHTML=k+`<h1>Accedi</h1><p>Scrivi la tua email di lavoro: ricevi un link per entrare. Niente password da ricordare.</p><form id="login-form" novalidate><label class="g-field"><span>Email</span><input id="login-email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required placeholder="nome@spadaroma.com" value="${esc(info||'')}"></label><button class="g-cta" type="submit"><span>Inviami il link</span><span aria-hidden="true">→</span></button><p id="login-msg" class="g-msg" role="status"></p></form><p class="g-note">Possono entrare solo gli indirizzi abilitati dall’amministratore. Il link vale una volta sola e scade dopo un’ora.</p>`;
+ else if(stato==='sent')c.innerHTML=k+`<h1>Controlla la posta</h1><p>Abbiamo inviato il link di accesso a</p><p class="g-mail">${esc(info)}</p><p>Aprilo da questo dispositivo. Se non arriva entro qualche minuto, guarda nello spam.</p><button class="g-alt" data-gate="login">Usa un’altra email</button>`;
+ else if(stato==='noauth')c.innerHTML=k+`<h1>Accesso non abilitato</h1><p>L’indirizzo</p><p class="g-mail">${esc(info)}</p><p>non è tra quelli autorizzati. Chiedi all’amministratore di aggiungerlo, poi riprova.</p><button class="g-alt" data-action="logout">Esci e usa un’altra email</button>`;
+ else c.innerHTML=k+`<h1>Qualcosa non va</h1><p>${esc(info||'')}</p><button class="g-alt" data-gate="login">Riprova</button>`;
+ setTheme(document.documentElement.dataset.theme==='dark'?'dark':'ivory');
+ const f=$('#login-form');if(f){setTimeout(()=>$('#login-email')?.focus(),50);f.addEventListener('submit',async e=>{e.preventDefault();const email=$('#login-email').value.trim().toLowerCase(),msg=$('#login-msg'),b=f.querySelector('button');if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){msg.textContent='Scrivi un indirizzo email completo.';$('#login-email').focus();return}b.disabled=true;msg.textContent='Invio in corso…';
+  const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+'/'}});
+  b.disabled=false;if(error){msg.textContent=/rate|limit|seconds/i.test(error.message)?'Troppe richieste ravvicinate: aspetta un minuto e riprova.':'Invio non riuscito: '+error.message;return}gate('sent',email)})}
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-gate]');if(b)gate(b.dataset.gate)});
+async function enter(session){
+ if(me&&me.email===session.user.email)return;
+ const {data:ruolo,error}=await sb.rpc('mio_ruolo');
+ if(error){gate('error','Non riesco a verificare il tuo accesso: '+error.message);return}
+ if(!ruolo){gate('noauth',session.user.email);return}
+ me={email:session.user.email,ruolo};$('#gate').hidden=true;
+ $('#main').innerHTML='<div class="loading">Caricamento articoli…</div>';
+ await loadAll();go();
+}
+sb.auth.onAuthStateChange((ev,session)=>{setTimeout(()=>{if(session&&(ev==='SIGNED_IN'||ev==='INITIAL_SESSION'))enter(session);else if(ev==='SIGNED_OUT'||(ev==='INITIAL_SESSION'&&!session)){me=null;state.arts=[];gate('login')}},0)});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&me&&!$('#drawer').open&&Date.now()-loadedAt>60000)loadAll().then(()=>{if(!$('#drawer').open)go()})});
+
+/* ---------- Eventi ---------- */
+document.addEventListener('click',e=>{
+ const t=e.target.closest('[data-action],[data-open],[data-sort],[data-goto],[data-dtab],[data-ctipo],[data-delcol],[data-delcamp],[data-theme],[data-open-menu],[data-close-menu]');if(!t)return;
+ if(t.dataset.openMenu!==undefined){$('#rail').classList.add('open');return}
+ if(t.dataset.closeMenu!==undefined){$('#rail').classList.remove('open');return}
+ if(t.dataset.theme){setTheme(t.dataset.theme);return}
+ if(t.dataset.open){openArt(t.dataset.open);if(t.dataset.dtabOpen){dTab=t.dataset.dtabOpen;renderDrawer()}return}
+ if(t.dataset.sort){const k=t.dataset.sort;F.dir=F.sort===k?-F.dir:(['ordinato','valore','costo','avvisi'].includes(k)?-1:1);F.sort=k;renderTable();return}
+ if(t.dataset.goto){location.hash=t.dataset.goto;return}
+ if(t.dataset.dtab){dTab=t.dataset.dtab;renderDrawer();return}
+ if(t.dataset.ctipo){campTipo=t.dataset.ctipo;renderCamp();return}
+ if(t.dataset.delcol){draft.colori.splice(+t.dataset.delcol,1);setDirty();renderKeep();return}
+ if(t.dataset.delcamp){draft.campionature.splice(+t.dataset.delcamp,1);setDirty();renderKeep();return}
+ const a=t.dataset.action;
+ if(a==='new')openArt(null);
+ else if(a==='close')closeDrawer();
+ else if(a==='saveart')saveArt();
+ else if(a==='applyscale'){const v=$('#drawer [data-scalacustom]').value.split(/[,;]/).map(x=>x.trim().toUpperCase()).filter(Boolean);draft.scalaCustom=[...new Set(v)];setDirty();renderKeep()}
+ else if(a==='addcol'){draft.colori.push({colore:'',ordinato:null,evaso:null,valFile:null,shippingOk:false,taglie:{}});setDirty();renderKeep();const ins=$$('#drawer [data-ck=colore]');ins[ins.length-1]?.focus()}
+ else if(a==='addcamp'){const f=$('#camp-form'),g=n=>f.querySelector(`[name=${n}]`).value;draft.campionature.push({tipo:g('tipo'),data:g('data')||null,esito:g('esito'),nota:g('nota').trim()||null});setDirty();renderKeep()}
+ else if(a==='delart'){const c=draft.codice,v=orig._v;ask(`Eliminare l’articolo ${c}?`,'La scheda, i colori e le campionature verranno tolti. Resta una copia nello storico.','Elimina',async()=>{const {error}=await sb.rpc('elimina_articolo',{p_codice:c,p_versione:v});if(error){toast(/conflitto/.test(error.message)?'Articolo modificato da altri nel frattempo: riaprilo e riprova':'Eliminazione non riuscita: '+error.message);return}state.arts=state.arts.filter(x=>x.codice!==c);closeDrawer(true);go();toast(`Articolo ${c} eliminato`)})}
+ else if(a==='clear'){Object.assign(F,{q:'',gruppo:'',fornitore:'',camp:'',tg:'',avvisi:false});renderOrdini()}
+ else if(a==='reload'){loadAll(true).then(()=>{go();toast('Dati aggiornati')})}
+ else if(a==='logout'){sb.auth.signOut()}
+ else if(a==='backup')backup();
+ else if(a==='addmember')addMember();
+ else if(a==='delmember'){const em=t.dataset.email;ask(`Togliere l’accesso a ${em}?`,'Non potrà più entrare. Le sue modifiche restano nello storico.','Togli accesso',async()=>{const {error}=await sb.rpc('rimuovi_membro',{p_email:em});if(error){toast('Non riuscito: '+error.message);return}await loadMembers();renderAccessi();toast('Accesso tolto')})}
+ else if(a==='copyriep'){const rows=riepRows(),txt=[[RIEP[riepBy][0],'Articoli','Colori','Pezzi','Valore'].join('\t'),...rows.map(r=>[r.k,r.art,r.col,r.pz,nf2.format(r.val)].join('\t'))].join('\n');navigator.clipboard?.writeText(txt).then(()=>toast('Tabella copiata: incollala in Excel'),()=>toast('Copia non consentita dal browser'))}
+ else if(a==='impcancel'){imp=null;renderImporta()}
+ else if(a==='impapply')applyImp();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('tr[data-open]'))openArt(e.target.dataset.open)});
+function setTheme(t){document.documentElement.dataset.theme=t==='dark'?'dark':'';$$('[data-theme]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.theme===t));try{localStorage.setItem(KEY+'-theme',t)}catch(e){}}
+try{const t=localStorage.getItem(KEY+'-theme');if(t)setTheme(t)}catch(e){}
+</script>
+</body>
+</html>
