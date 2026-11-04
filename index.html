@@ -49,7 +49,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .crumb strong{color:var(--ink)}
 .crumb span{margin:0 6px}
 .season{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--quiet);font-size:13px}
-.season select{background:var(--surface);border:1px solid var(--edge);border-radius:8px;padding:8px 12px;min-width:120px}
+.season select{background-color:var(--surface);border:1px solid var(--edge);border-radius:8px;padding:8px 12px;min-width:120px;min-height:40px}
 .theme{display:flex;gap:3px;background:var(--controls);padding:3px;border-radius:8px;border:1px solid var(--edge)}
 .theme button{border:0;background:none;padding:6px 9px;border-radius:5px;font-size:11px;letter-spacing:.025em;text-transform:uppercase;color:var(--quiet);cursor:pointer}
 .theme button[aria-pressed=true]{background:var(--data);color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgb(0 0 0/.12)}
@@ -91,15 +91,20 @@ button.kpi:hover{border-color:var(--ink)}
 .toolbar .search{flex:1 1 240px}
 input:not([type=checkbox]),select,textarea{background:var(--surface);border:1px solid var(--edge);border-radius:8px;padding:9px 11px;min-height:40px;color:var(--ink);text-transform:none;letter-spacing:0;font-size:14px;width:100%}
 textarea{min-height:76px;resize:vertical}
+select{-webkit-appearance:none;appearance:none;padding-right:42px!important;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%236B675E' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;background-size:12px 8px;cursor:pointer;text-overflow:ellipsis}
+:root[data-theme=dark] select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%23D1CEC6' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+select::-ms-expand{display:none}
+input[list]::-webkit-calendar-picker-indicator{display:none!important;opacity:0}
+input[list]{padding-right:14px}
 input[type=checkbox]{accent-color:var(--ink);width:18px;height:18px}
 .check{display:flex!important;align-items:center;gap:8px;text-transform:none!important;letter-spacing:0!important;font-size:13px!important;min-height:40px}
 .table-scroll{overflow:auto;max-height:70vh}
 table{width:100%;border-collapse:collapse;font-size:14px}
-th{position:sticky;top:0;z-index:1;background:var(--columns);color:var(--secondary);font-size:11px;letter-spacing:.05em;text-transform:uppercase;font-weight:600;text-align:left;padding:10px 14px;border-bottom:1px solid var(--edge);white-space:nowrap}
+th{position:sticky;top:0;z-index:1;background:var(--columns);color:var(--secondary);font-size:11px;letter-spacing:.05em;text-transform:uppercase;font-weight:600;text-align:left;padding:10px 12px;border-bottom:1px solid var(--edge);white-space:nowrap}
 th.r,td.r{text-align:right}
 th button{all:unset;cursor:pointer}
 th button:hover{text-decoration:underline}
-td{padding:11px 14px;border-bottom:1px solid var(--edge);color:var(--secondary);vertical-align:top}
+td{padding:11px 12px;border-bottom:1px solid var(--edge);color:var(--secondary);vertical-align:top}
 tbody tr:nth-child(even){background:var(--alt)}
 tbody tr.click{cursor:pointer}
 tbody tr.click:hover{background:var(--hover)}
@@ -111,7 +116,7 @@ td.r .sub{white-space:nowrap;font-size:11px}
 tfoot td{background:var(--heading);font-weight:700;color:var(--ink)}
 .table-bottom{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 18px;background:var(--heading);border-top:1px solid var(--edge);border-radius:0 0 9px 9px;font-size:12px;color:var(--quiet)}
 .empty{padding:40px 18px;text-align:center;color:var(--quiet)}
-.forn{display:block;max-width:170px;font-size:13px;color:var(--secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.forn{display:block;max-width:130px;font-size:13px;color:var(--secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chips{display:flex;flex-wrap:wrap;gap:4px}
 .chip{font-size:11px;border:1px solid var(--edge);border-radius:5px;padding:1px 6px;color:var(--secondary);white-space:nowrap;background:var(--surface)}
 
@@ -124,7 +129,9 @@ tfoot td{background:var(--heading);font-weight:700;color:var(--ink)}
 .st[data-s=da_rivedere]{color:var(--ink);font-weight:700}
 .st[data-s=da_rivedere]::before{border-radius:1px;background:var(--lime);border-color:var(--ink)}
 .st[data-s=in_attesa]{color:var(--quiet)}
-.flag{font-family:var(--mono);font-size:11px;white-space:nowrap}
+.flag{font-family:var(--mono);font-size:11px;white-space:nowrap;line-height:1.7}
+@media(max-width:1366px) and (min-width:681px){#t-ordini th:nth-child(3),#t-ordini td:nth-child(3){display:none}}
+@media(max-width:680px){#t-ordini :is(th,td):is(:nth-child(3),:nth-child(4),:nth-child(6),:nth-child(7),:nth-child(8),:nth-child(9),:nth-child(10)){display:none}#t-ordini .table-scroll,#t-ordini{max-height:none}#t-ordini td .main{font-size:14px}}
 .flag b{font-weight:700;color:var(--ink)}
 .lvl{font-family:var(--mono);font-size:10px;letter-spacing:.06em;padding:2px 6px;border-radius:4px;border:1px solid var(--edge);white-space:nowrap}
 .lvl[data-l=errore]{background:var(--ink);color:var(--canvas);border-color:var(--ink)}
@@ -161,7 +168,10 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 .comp-preview span b{font-weight:700}
 .mini td,.mini th{padding:8px 10px}
 .mini input{min-height:34px;padding:6px 8px}
-.mini input.tg{width:46px;text-align:right;padding:6px 5px}
+.mini input.tg{width:42px;text-align:right;padding:6px 4px}
+.tg-table .del{border:0;background:none;width:32px;height:32px;border-radius:6px;font-size:18px;line-height:1;color:var(--quiet);cursor:pointer}
+.tg-table .del:hover{background:var(--hover);color:var(--ink)}
+.chips{min-width:128px}
 .tg-table td .sub{display:block;font-size:10px;color:var(--ink);font-weight:700;margin-top:2px;white-space:nowrap}
 .mini input[readonly]{background:transparent;border-style:dashed;font-family:var(--mono)}
 .tg-table th.r,.tg-table td.r{padding-left:4px;padding-right:4px}
@@ -437,7 +447,7 @@ function renderTable(){
  const th=(k,t,r)=>`<th class="${r?'r':''}" aria-sort="${F.sort===k?(F.dir>0?'ascending':'descending'):'none'}"><button data-sort="${k}">${t}${F.sort===k?(F.dir>0?' ↑':' ↓'):''}</button></th>`;
  $('#t-ordini').innerHTML=l.length?`<table><thead><tr>${th('codice','Codice')}${th('descrizione','Articolo')}${th('fornitore','Fornitore')}<th>Colori</th>${th('ordinato','Pezzi',1)}${th('costo','Costo',1)}${th('valore','Valore',1)}<th>PP sample</th><th>Shipping</th>${th('avvisi','Avvisi')}</tr></thead><tbody>${l.map(a=>{
   const ck=checks(a).filter(c=>c.rule.l!=='info'),e=ck.filter(c=>c.rule.l==='errore').length,v=ck.length-e,pp=lastCamp(a,'PP'),sh=lastCamp(a,'Shipping');
-  return `<tr class="click" data-open="${esc(a.codice)}" tabindex="0"><td class="num"><span class="main">${esc(a.codice)}</span><span class="sub">${esc(a.codiceAlt||'')}</span></td><td><span class="main">${esc(a.descrizione)}</span><span class="sub">${esc(a.gruppo||'')} · ${esc(a.stagione||'')}</span></td><td><span class="forn" title="${esc(a.fornitore||'')}">${esc(a.fornitore||'—')}</span></td><td><div class="chips">${a.colori.map(c=>`<span class="chip" title="${n0(cq(c))} pz">${esc(c.colore)}</span>`).join('')}</div></td><td class="r num">${n0(tot(a))}<span class="sub">${isTU(a)?'TU':`taglie ${a.colori.filter(hasTg).length}/${a.colori.length}`}</span></td><td class="r num">${n2(a.costoValuta)}</td><td class="r num">${n0(valore(a))}</td><td><span class="st" data-s="${campState(a,'PP')}">${ESITI[campState(a,'PP')]}</span><span class="sub num">${pp?dIT(pp.data):''}</span></td><td><span class="st" data-s="${campState(a,'Shipping')}">${ESITI[campState(a,'Shipping')]}</span><span class="sub num">${sh?dIT(sh.data):''}</span></td><td>${ck.length?`<span class="flag">${e?`<b>${e} errori</b>`:''}${e&&v?' · ':''}${v?`${v} da verificare`:''}</span>`:'<span class="sub">—</span>'}</td></tr>`}).join('')}</tbody></table>`:`<div class="empty">Nessun articolo con questi filtri. <button class="link" data-action="clear">Azzera filtri</button></div>`;
+  return `<tr class="click" data-open="${esc(a.codice)}" tabindex="0"><td class="num"><span class="main">${esc(a.codice)}</span><span class="sub">${esc(a.codiceAlt||'')}</span></td><td><span class="main">${esc(a.descrizione)}</span><span class="sub">${esc(a.gruppo||'')} · ${esc(a.stagione||'')}</span></td><td><span class="forn" title="${esc(a.fornitore||'')}">${esc(a.fornitore||'—')}</span></td><td><div class="chips">${a.colori.map(c=>`<span class="chip" title="${n0(cq(c))} pz">${esc(c.colore)}</span>`).join('')}</div></td><td class="r num">${n0(tot(a))}<span class="sub">${isTU(a)?'TU':`taglie ${a.colori.filter(hasTg).length}/${a.colori.length}`}</span></td><td class="r num">${n2(a.costoValuta)}</td><td class="r num">${n0(valore(a))}</td><td><span class="st" data-s="${campState(a,'PP')}">${ESITI[campState(a,'PP')]}</span><span class="sub num">${pp?dIT(pp.data):''}</span></td><td><span class="st" data-s="${campState(a,'Shipping')}">${ESITI[campState(a,'Shipping')]}</span><span class="sub num">${sh?dIT(sh.data):''}</span></td><td>${ck.length?`<span class="flag">${e?`<b>${e} ${e===1?'errore':'errori'}</b>`:''}${e&&v?'<br>':''}${v?`${v} da verificare`:''}</span>`:'<span class="sub">—</span>'}</td></tr>`}).join('')}</tbody></table>`:`<div class="empty">Nessun articolo con questi filtri. <button class="link" data-action="clear">Azzera filtri</button></div>`;
  $('#t-bottom').innerHTML=`<span>${n0(l.length)} di ${n0(state.arts.length)} articoli · ${n0(l.reduce((s,a)=>s+tot(a),0))} pezzi · valore ${n0(l.reduce((s,a)=>s+valore(a),0))}</span><span>Clic su una riga per aprire la scheda</span>`;
 }
 
@@ -485,8 +495,8 @@ function renderDrawer(){
   ${sk==='custom'?`<label class="w2">Taglie, separate da virgola<span style="display:flex;gap:8px"><input data-scalacustom value="${esc((a.scalaCustom||[]).join(', '))}" placeholder="es. 85, 90, 95, 100"><button class="btn" type="button" data-action="applyscale">Applica</button></span></label>`:`<p class="w2" style="align-self:end;margin:0 0 10px;color:var(--quiet);font-size:12px">${a.scala?'Scala scelta per questo articolo':'Proposta in base al gruppo '+esc(a.gruppo||'—')}</p>`}</div>
   <p class="notice">${tu?'<strong>Taglia unica.</strong> Basta il totale per colore.':'<strong>Totale = somma delle taglie.</strong> Scrivi i pezzi per taglia; finché le taglie di un colore sono vuote resta il totale del file.'}</p>
   ${fs.length?`<p class="notice err"><strong>Taglie fuori scala:</strong> ${esc(fs.join(', '))}. Restano visibili finché non le azzeri.</p>`:''}
-  <div class="table-scroll" style="max-height:none"><table class="mini tg-table"><thead><tr><th>Colore</th>${tu?'':cols.map(t=>`<th class="r"${sc.includes(t)?'':' title="Fuori scala"'}>${esc(t)}${sc.includes(t)?'':' *'}</th>`).join('')}<th class="r">Totale</th><th class="r">Evaso</th><th class="r">Valore</th><th>Ship. OK</th><th></th></tr></thead><tbody>
-  ${a.colori.map((c,i)=>`<tr><td><input data-c="${i}" data-ck="colore" value="${esc(c.colore)}" aria-label="Colore ${i+1}" style="min-width:92px;width:92px"></td>${tu?'':cols.map(t=>`<td class="r"><input class="tg" data-c="${i}" data-tg="${esc(t)}" inputmode="numeric" value="${c.taglie&&filled(c.taglie[t])?c.taglie[t]:''}" aria-label="${esc(c.colore)} taglia ${esc(t)}"></td>`).join('')}<td class="r"><input data-c="${i}" data-ck="ordinato" data-totin="${i}" inputmode="numeric" value="${hasTg(c)?sumTg(c):(c.ordinato??'')}" ${hasTg(c)?'readonly':''} aria-label="Totale ${esc(c.colore)}" style="width:76px;text-align:right"><span class="sub" data-live-diff="${i}"></span></td><td class="r"><input data-c="${i}" data-ck="evaso" inputmode="numeric" value="${c.evaso??''}" aria-label="Pezzi evasi" style="width:64px;text-align:right"></td><td class="r num" data-live-row="${i}"></td><td><input type="checkbox" data-c="${i}" data-ck="shippingOk" ${c.shippingOk?'checked':''} aria-label="Shipping OK"></td><td class="r"><button class="link" data-delcol="${i}" aria-label="Togli colore">Togli</button></td></tr>`).join('')}
+  <div class="table-scroll" style="max-height:none"><table class="mini tg-table"><thead><tr><th>Colore</th>${tu?'':cols.map(t=>`<th class="r"${sc.includes(t)?'':' title="Fuori scala"'}>${esc(t)}${sc.includes(t)?'':' *'}</th>`).join('')}<th class="r">Totale</th><th class="r">Evaso</th><th class="r">Valore</th><th title="Shipping OK">Ship.</th><th><span class="sr">Togli</span></th></tr></thead><tbody>
+  ${a.colori.map((c,i)=>`<tr><td><input data-c="${i}" data-ck="colore" value="${esc(c.colore)}" aria-label="Colore ${i+1}" style="min-width:88px;width:88px"></td>${tu?'':cols.map(t=>`<td class="r"><input class="tg" data-c="${i}" data-tg="${esc(t)}" inputmode="numeric" value="${c.taglie&&filled(c.taglie[t])?c.taglie[t]:''}" aria-label="${esc(c.colore)} taglia ${esc(t)}"></td>`).join('')}<td class="r"><input data-c="${i}" data-ck="ordinato" data-totin="${i}" inputmode="numeric" value="${hasTg(c)?sumTg(c):(c.ordinato??'')}" ${hasTg(c)?'readonly':''} aria-label="Totale ${esc(c.colore)}" style="width:68px;text-align:right"><span class="sub" data-live-diff="${i}"></span></td><td class="r"><input data-c="${i}" data-ck="evaso" inputmode="numeric" value="${c.evaso??''}" aria-label="Pezzi evasi" style="width:56px;text-align:right"></td><td class="r num" data-live-row="${i}"></td><td><input type="checkbox" data-c="${i}" data-ck="shippingOk" ${c.shippingOk?'checked':''} aria-label="Shipping OK"></td><td class="r"><button class="del" data-delcol="${i}" aria-label="Togli il colore ${esc(c.colore)}" title="Togli colore">×</button></td></tr>`).join('')}
   </tbody><tfoot><tr><td>Totale</td>${tu?'':cols.map(t=>`<td class="r num" data-live-tg="${esc(t)}"></td>`).join('')}<td class="r num" data-live="pz"></td><td class="r num" data-live="ev"></td><td class="r num" data-live="val"></td><td colspan="2"></td></tr></tfoot></table></div>
   <p><button class="btn" data-action="addcol">+ Aggiungi colore</button></p></section>`;
  } else if(dTab==='camp'){
