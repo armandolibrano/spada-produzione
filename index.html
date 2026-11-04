@@ -214,41 +214,26 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 .drop strong{font-size:18px}
 .diff-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
 
-#gate{position:fixed;inset:0;z-index:200;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);background:var(--heading);overflow:auto}
+#gate{position:fixed;inset:0;z-index:200;background:#070706;color:#F4F1E9;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;overflow:auto}
 #gate[hidden]{display:none}
-.g-side{background:#070706;color:#F4F1E9;display:flex;flex-direction:column;padding:40px clamp(28px,4.5vw,72px);min-height:100dvh}
-.g-brand{display:flex;align-items:baseline;gap:14px}
-.g-brand b{font-weight:800;font-size:22px;letter-spacing:-.04em}
-.g-brand span{font-size:10px;letter-spacing:.09em;color:#99968F}
-.g-title{margin:auto 0 0;padding-top:72px;font-weight:800;font-size:clamp(44px,5.6vw,88px);line-height:.96;letter-spacing:-.045em;max-width:9.5em}
-.g-title em{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-weight:400;letter-spacing:-.02em}
-.g-lead{margin:22px 0 0;color:#D1CEC6;font-size:15px;line-height:1.55;max-width:44ch}
-.g-list{list-style:none;margin:44px 0 0;padding:0;border-top:1px solid #26251F;max-width:560px}
-.g-list li{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:baseline;padding:13px 0;border-bottom:1px solid #26251F;font-size:14px}
-.g-list .n{font-family:var(--mono);font-size:11px;color:#99968F}
-.g-list .d{color:#99968F;font-size:12px;text-align:right}
-.g-foot{display:flex;justify-content:space-between;gap:16px;margin-top:40px;font-size:11px;letter-spacing:.04em;color:#99968F}
-.g-foot a{color:#D1CEC6;text-underline-offset:3px}
-.g-main{display:flex;flex-direction:column;justify-content:center;padding:40px clamp(28px,5vw,88px);min-height:100dvh;color:var(--ink)}
-.g-top{display:flex;justify-content:flex-end;margin-bottom:auto}
-.g-top .theme{border-radius:2px}.g-top .theme button{border-radius:1px}
-.g-form{width:100%;max-width:400px;margin:auto 0}
-.g-form .g-kicker{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--quiet);margin:0 0 18px}
-.g-form h1{margin:0 0 12px;font-weight:800;font-size:clamp(34px,3.4vw,48px);line-height:1;letter-spacing:-.04em}
-.g-form p{margin:0 0 30px;color:var(--secondary);font-size:15px;line-height:1.55;max-width:38ch}
-.g-field{display:block;margin-bottom:28px}
-.g-field span{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--quiet);margin-bottom:6px}
-.g-field input{border:0!important;border-bottom:1px solid var(--ink)!important;border-radius:0!important;background:transparent!important;padding:10px 0!important;font-size:18px!important;min-height:48px}
+.g-form{width:100%;max-width:380px}
+.g-form .g-kicker{margin:0 0 40px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#D1CEC6;text-align:center}
+.g-form h1{margin:0 0 14px;font-weight:800;font-size:30px;line-height:1.05;letter-spacing:-.035em;color:#F4F1E9;text-align:center}
+.g-form p{margin:0 0 18px;color:#D1CEC6;font-size:14px;line-height:1.55;text-align:center}
+.g-field{display:block;margin-bottom:22px}
+.g-field input{border:0!important;border-bottom:1px solid #F4F1E9!important;border-radius:0!important;background:transparent!important;color:#F4F1E9!important;padding:10px 0!important;font-size:17px!important;min-height:48px;text-align:center}
+.g-field input::placeholder{color:#6B675E}
 .g-field input:focus{outline:none;border-bottom-width:2px!important;padding-bottom:9px!important}
-.g-cta{width:100%;min-height:54px;border:0;border-radius:2px;background:var(--lime);color:#070706;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
+.g-field input:-webkit-autofill{-webkit-text-fill-color:#F4F1E9;transition:background-color 9999s}
+.g-cta{width:100%;min-height:52px;border:0;border-radius:2px;background:#DFFF3F;color:#070706;font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
 .g-cta:hover{filter:brightness(.95)}.g-cta:disabled{opacity:.5;cursor:wait}
-.g-cta:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
-.g-form .g-msg{min-height:22px;margin:14px 0 0;max-width:none;font-size:13px;color:var(--ink)}
-.g-form .g-note{max-width:none;margin:36px 0 0;padding-top:16px;border-top:1px solid var(--edge);font-size:12px;color:var(--quiet);line-height:1.6}
-.g-form .g-mail{margin:0 0 18px;font-family:var(--mono);font-size:15px;color:var(--ink);word-break:break-all}
-.g-alt{margin-top:8px;border:0;background:none;padding:0;color:var(--ink);font-size:14px;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
-.g-mobile-foot{display:none}
-@media(max-width:860px){#gate{grid-template-columns:1fr}.g-side{min-height:0;padding:22px 20px 30px}.g-title{padding-top:40px;font-size:clamp(38px,11vw,54px)}.g-lead{font-size:14px}.g-list,.g-foot{display:none}.g-main{min-height:0;padding:28px 20px 40px}.g-top{display:none}.g-form{margin:0}.g-mobile-foot{display:flex;justify-content:space-between;margin-top:40px;font-size:11px;color:var(--quiet)}}
+.g-cta:focus-visible{outline:2px solid #F4F1E9;outline-offset:3px}
+.g-form .g-msg{min-height:20px;margin:16px 0 0;font-size:13px;color:#F4F1E9}
+.g-form .g-mail{margin:0 0 18px;font-family:var(--mono);font-size:14px;color:#F4F1E9;word-break:break-all}
+.g-alt{display:block;margin:8px auto 0;border:0;background:none;padding:0;color:#F4F1E9;font-size:13px;text-decoration:underline;text-underline-offset:4px;cursor:pointer}
+.g-credit{position:absolute;bottom:22px;left:0;right:0;text-align:center;font-size:10px;letter-spacing:.06em;color:#6B675E}
+.g-credit a{color:#99968F;text-decoration:none}
+.g-credit a:hover{text-decoration:underline}
 .side-link{color:#F4F1E9!important;font-size:11px}
 .me{color:#F4F1E9;font-size:12px;margin-bottom:6px}
 .me small{display:block;color:#AAA99F;font-size:10px;letter-spacing:.05em;text-transform:uppercase}
@@ -308,7 +293,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 <dialog id="drawer" aria-labelledby="d-title"></dialog>
 <dialog id="modal" style="max-width:440px;padding:22px"></dialog>
 <div id="toast" role="status" aria-live="polite"></div>
-<div id="gate"><aside class="g-side" aria-hidden="false"><div class="g-brand"><b>SPADA</b><span>COMPANY WORKSPACE</span></div><h2 class="g-title">Produzione, ordini e <em>campioni</em>.</h2><p class="g-lead">Lo spazio di lavoro della stagione: articoli, colori, taglie e campionature in un unico posto, aggiornato per tutto il team.</p><ol class="g-list"><li><span class="n">01</span><span>Ordini stagione</span><span class="d">Articoli · colori · taglie</span></li><li><span class="n">02</span><span>Campionature</span><span class="d">PP · shipping · fit</span></li><li><span class="n">03</span><span>Riepiloghi</span><span class="d">Pezzi e valore</span></li><li><span class="n">04</span><span>Controllo errori</span><span class="d">Prima che diventino problemi</span></li></ol><div class="g-foot"><span>Napoli · Italy</span><span>Design &amp; sviluppo <a href="https://librano.it" target="_blank" rel="noopener noreferrer">librano.it ↗</a></span></div></aside><main class="g-main"><div class="g-top"><div class="theme" role="group" aria-label="Aspetto"><button type="button" data-theme="ivory" aria-pressed="true">Avorio</button><button type="button" data-theme="dark" aria-pressed="false">Scuro</button></div></div><div class="g-form" id="gate-card"><p class="g-kicker">Accesso riservato</p><p>Caricamento…</p></div><div class="g-mobile-foot"><span>Napoli · Italy</span><span>librano.it</span></div></main></div>
+<div id="gate"><div class="g-form" id="gate-card"><p class="g-kicker">Accesso riservato · Team Spada</p></div><div class="g-credit"><a href="https://librano.it" target="_blank" rel="noopener noreferrer">librano.it</a></div></div>
 
 <script src="/vendor/supabase.js"></script>
 <script src="/config.js"></script>
@@ -769,11 +754,11 @@ function backup(){
 function gate(stato,info){
  const g=$('#gate'),c=$('#gate-card');g.hidden=false;
  const k='<p class="g-kicker">Accesso riservato · Team Spada</p>';
- if(stato==='login')c.innerHTML=k+`<h1>Accedi</h1><p>Scrivi la tua email di lavoro: ricevi un link per entrare. Niente password da ricordare.</p><form id="login-form" novalidate><label class="g-field"><span>Email</span><input id="login-email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required placeholder="nome@spadaroma.com" value="${esc(info||'')}"></label><button class="g-cta" type="submit"><span>Inviami il link</span><span aria-hidden="true">→</span></button><p id="login-msg" class="g-msg" role="status"></p></form><p class="g-note">Possono entrare solo gli indirizzi abilitati dall’amministratore. Il link vale una volta sola e scade dopo un’ora.</p>`;
- else if(stato==='sent')c.innerHTML=k+`<h1>Controlla la posta</h1><p>Abbiamo inviato il link di accesso a</p><p class="g-mail">${esc(info)}</p><p>Aprilo da questo dispositivo. Se non arriva entro qualche minuto, guarda nello spam.</p><button class="g-alt" data-gate="login">Usa un’altra email</button>`;
- else if(stato==='noauth')c.innerHTML=k+`<h1>Accesso non abilitato</h1><p>L’indirizzo</p><p class="g-mail">${esc(info)}</p><p>non è tra quelli autorizzati. Chiedi all’amministratore di aggiungerlo, poi riprova.</p><button class="g-alt" data-action="logout">Esci e usa un’altra email</button>`;
+ if(stato==='login')c.innerHTML=k+`<form id="login-form" novalidate><label class="g-field"><span class="sr">Email</span><input id="login-email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required placeholder="nome@spadaroma.com" value="${esc(info||'')}"></label><button class="g-cta" type="submit">Entra</button><p id="login-msg" class="g-msg" role="status"></p></form>`;
+ else if(stato==='sent')c.innerHTML=k+`<h1>Controlla la posta</h1><p>Link di accesso inviato a</p><p class="g-mail">${esc(info)}</p><p>Aprilo da questo dispositivo.</p><button class="g-alt" data-gate="login">Usa un’altra email</button>`;
+ else if(stato==='noauth')c.innerHTML=k+`<h1>Accesso non abilitato</h1><p class="g-mail">${esc(info)}</p><p>Chiedi all’amministratore di abilitarlo.</p><button class="g-alt" data-action="logout">Usa un’altra email</button>`;
  else c.innerHTML=k+`<h1>Qualcosa non va</h1><p>${esc(info||'')}</p><button class="g-alt" data-gate="login">Riprova</button>`;
- setTheme(document.documentElement.dataset.theme==='dark'?'dark':'ivory');
+
  const f=$('#login-form');if(f){setTimeout(()=>$('#login-email')?.focus(),50);f.addEventListener('submit',async e=>{e.preventDefault();const email=$('#login-email').value.trim().toLowerCase(),msg=$('#login-msg'),b=f.querySelector('button');if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){msg.textContent='Scrivi un indirizzo email completo.';$('#login-email').focus();return}b.disabled=true;msg.textContent='Invio in corso…';
   const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+'/'}});
   b.disabled=false;if(error){msg.textContent=/rate|limit|seconds/i.test(error.message)?'Troppe richieste ravvicinate: aspetta un minuto e riprova.':'Invio non riuscito: '+error.message;return}gate('sent',email)})}
